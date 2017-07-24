@@ -69,11 +69,12 @@
     }
 
     message SignedIdentity {
-      // TODO
+      // TODO: unecrpyted container containing Redactable<T> fields
+      // ID bridge cannot leave fields empty -> all are required
     }
     ```
 
-4. The node creates a payload containing the query to be run and the signed identity, and submits it to a consent service listed in the metadata file. The consent service returns a `SignedQuery` if it's conditions are met or a `BadQueryResponse` if not.
+4. The node creates a payload containing the query to be run and the signed identity, and submits it to a consent service listed in the metadata file. The consent service signs the scope if it's conditions are met or a `BadQueryResponse` if not. The query servers then satisfy themselves that the query being asked of them makes sense within that scope.
 
     1. The consent service checks that the query is allowed to be asked for this subject now. How it does this is implementation-dependent, but a scheme which asks the subject for their permission or requires an agent to assert they have gained permission is the intention. TODO more? 
 
@@ -83,22 +84,59 @@
       bytes signature = 2;
     }
 
-    message Query {
+    message Question {
       string name = 1;
       repeated Param inputs = 2;
-      SignedIdentity subjectIdentity = 3;
-      PersonIdentity delegateIdentity = 4;
-      ClientIdentity agentIdentity = 5;
-      ServiceIdentity serviceIdentity = 6;
-      bytes queryId = 7;
-      repeated Choice choices = 8;
-      // TODO: queryId same across all nodes?
+      DSA legalAccess = 9; // TODO: interesting that this has ended up here. is it a dragon?
     }
+
+    message Query {
+      Question question = 1;
+      Signed<Scope> scope = 3;
+      
+      // The transaction-id of the scope is the digest. TODO: algorithm.
+      message Scope {
+        Question originalQuestion = 1;
+        bytes nOnce = 2; // Monotonically increasing value set by CS
+        SignedIdentity subjectIdentity = 3;
+        PersonIdentity delegateIdentity = 4;
+        ClientIdentity agentIdentity = 5;
+        ServiceIdentity serviceIdentity = 6;
+        repeated Choice choices = 8; // TODO: ???
+      }
+    }
+
+    message Redactable<T> {
+      message RealValue {
+        int salt = 1;
+        T value = 2;
+      }
+
+      message EncryptedValue {
+        bytes hash = 1;
+        bytes blob = 2;
+      }
+
+      oneof {
+        bytes hash = 1;
+        RealValue value = 2;
+        EncryptedValue encrypted = 3; 
+      }
+    } 
+
+    message RedactableContainer<T> {
+      T message = 1;
+      bytes rootHash = 2;
+      bytes signatureOfHash = 3;
+      map<string, bytes> nodeKeys = 4;
+    }
+
+    SignedQuery = RedactableContainer<Query>
     ```
 
 5. The sending node sends the signed query to the first hop node.
 
-    1. The sending node should redact the identity fields that are `optional` using the object hashing method TODO.
+    1. The sending node should redact the identity fields that are `optional` using the object hashing method TODO: what i sthe object hashing method. c.f. Ben Laurie who is well known.
     
 5. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns a `BadQuery` response. Receiving nodes should check that:
 
@@ -109,6 +147,7 @@
     4. No checks are made on the agent and delegate identities (this is handled by the consent server)
     6. The identity has been encrypted for the all the nodes that will need it (and not more)
     7. The identity contains all the fields required and shared between all of the nodes (as above)
+    8. The transaction-id (the digest of the `Scope` object, not including the signature) has not been used before.
 
     ```protobuf
     message BadQueryResponse {
@@ -128,13 +167,12 @@
       Reason reason = 2;
     }
 
-6. The receiving node starts running the query.
+6. The receiving node starts preparing the query.
 
     1. If it encouters a peice of data that is required from another node, it forms a `Query` payload of it's own and submits that to the next node.
 
-        0. The `name` and `inputs` are defined by whatever information it needs from the next node.
-        1. The identities are copied verbatim from the received `Query`.
-        2. The `queryId` should be the same as the received `Query`.
+        1. The `name` and `inputs` are defined by whatever information it needs from the next node. The `legalAgreement` is picked from the metadata based on the `scope`. TODO: metadata contains DSAs that are limited to specific scopes.
+        2. The `scope` is copied from the previous query.
 
     2. If it encounters a peice of data that is required from a database it has access to, it decrypts and attempts to match the `subjectIdentity` to it's database. This process is implementation-dependent.
 
@@ -149,7 +187,7 @@
     }
     ```
 
-    All of the responses to a query are wrapped in a `QueryResponse`.
+    All of the responses to a query are wrapped in a `MatchingResponse`.
 
       1. If the node decides it wants more information to disambiguate or build confidence in the match, it should send a `MoreIdentityResponse` encrypted with the session key and containing details of the fields required.
 
@@ -159,18 +197,48 @@
           repeated string fields = 1;
         }
 
-        bytes encryptedIdentityFields = 1;
+        Encrypted<IdentityFields> encryptedIdentityFields = 1;
       } // TODO: encryption
       ```
 
-      2. If the node decides it cannot match the identity, it must send a `NoMatchResponse`. 
+      2. If the node decides it has finished matching and it is ready to proceed (either because it has a high-confidence single result, or because it cannot match the identity), it must send a `MatchCompleteResponse`.
 
       ```protobuf
-      message NoMatchResponse {
+      message MatchCompleteResponse {
       } 
       ```
 
-    3. If the node successfully completes the query, it returns the result as a `ValueResponse`.
+    Intermediate servers must pass through the encrypted responses to the origin node.
+
+7. If any of the nodes return a `MoreIdentityResponse`, the SP must resubmit the `Query` message with unredacted identity fields.
+
+    1. The identity message must contain exactly the fields it did previously along with every field that was additionally requested by  one or more nodes.
+    2. The same set of fields must be sent to each node.
+
+7. When the origin node has received responses from all of the identity  nodes, it sends a `SecondWhistle` message along the query path to tell the query servers to begin executing the query logic against the data from the matched records. Once the `SecondWhilste` has been processed, the node can finalise the transaction and clear resources - no further messages for this `queryId` are permitted.
+
+```protobuf
+message SecondWhistle {
+  bytes queryId = 1;
+  // TODO: how do we ensure this comes from the SP??
+}
+``` 
+
+8. The nodes on the query path execute the query logic.
+
+    1. If the node requires data from another node, it passes on the `SecondWhistle` message to that node and awaits the `ExecResponse`. It is up to the node when and if it actually forwards the `SecondWhistle` message (for instance, it may concurrently request all data or it may wait until it has evaluated earlier branches in an OR-type condition). It should only send the `SecondWhistle` if it requires the data.
+
+    ```protobuf
+    message QueryAnswer {
+      bytes queryId = 1;
+      oneof result {
+        ValueResponse value = 2;
+        ErrorResponse error = 3;
+      }
+    }
+    ```
+
+    2. If the node has all the data required to run a query (either as data from a database it has access to or from responses from other nodes), it transforms the result according to the required query, and then returns a `ValueResponse`.
 
     ```protobuf
     message ValueResponse {
@@ -179,4 +247,20 @@
     }
     ```
 
-7. The node returns it's result of running the query 
+    3. If the node fails to run the query, it returns an `ErrorResponse`.
+
+    ```protobuf
+    message ErrorResponse {
+      // TODO
+    }
+    ```
+
+    4. If it finishes a query and has not forwarded the `SecondWhilstle` message, it must instead send a `Finish` message to allow the subsequent nodes to clear resources.
+
+    ```protobuf
+    message Finish {
+      bytes queryId = 1;
+    }
+    ```
+
+9. That's it.
