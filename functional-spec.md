@@ -92,6 +92,7 @@
 
     message Query {
       Question question = 1;
+      bytes queryId = 2;
       Signed<Scope> scope = 3;
       
       // The transaction-id of the scope is the digest. TODO: algorithm.
@@ -173,6 +174,7 @@
 
         1. The `name` and `inputs` are defined by whatever information it needs from the next node. The `legalAgreement` is picked from the metadata based on the `scope`. TODO: metadata contains DSAs that are limited to specific scopes.
         2. The `scope` is copied from the previous query.
+        3. The `queryId` is a unique id that identifies the conversation between two nodes (as distinct from the transaction-id, which identifies all the conversations answering the highest-level question).
 
     2. If it encounters a peice of data that is required from a database it has access to, it decrypts and attempts to match the `subjectIdentity` to it's database. This process is implementation-dependent.
 
