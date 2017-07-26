@@ -167,6 +167,7 @@
       bytes queryId = 1;
       Reason reason = 2;
     }
+    ```
 
 6. The receiving node starts preparing the query.
 
@@ -219,50 +220,50 @@
 
 7. When the origin node has received responses from all of the identity  nodes, it sends a `SecondWhistle` message along the query path to tell the query servers to begin executing the query logic against the data from the matched records. Once the `SecondWhilste` has been processed, the node can finalise the transaction and clear resources - no further messages for this `queryId` are permitted.
 
-```protobuf
-message SecondWhistle {
-  bytes queryId = 1;
-  // TODO: how do we ensure this comes from the SP??
-}
-``` 
+    ```protobuf
+    message SecondWhistle {
+      bytes queryId = 1;
+      // TODO: how do we ensure this comes from the SP??
+    }
+    ``` 
 
 8. The nodes on the query path execute the query logic.
 
     1. If the node requires data from another node, it passes on the `SecondWhistle` message to that node and awaits the `ExecResponse`. It is up to the node when and if it actually forwards the `SecondWhistle` message (for instance, it may concurrently request all data or it may wait until it has evaluated earlier branches in an OR-type condition). It should only send the `SecondWhistle` if it requires the data.
 
-    ```protobuf
-    message QueryAnswer {
-      bytes queryId = 1;
-      oneof result {
-        ValueResponse value = 2;
-        ErrorResponse error = 3;
-      }
-    }
-    ```
+        ```protobuf
+        message QueryAnswer {
+          bytes queryId = 1;
+          oneof result {
+            ValueResponse value = 2;
+            ErrorResponse error = 3;
+          }
+        }
+        ```
 
     2. If the node has all the data required to run a query (either as data from a database it has access to or from responses from other nodes), it transforms the result according to the required query, and then returns a `ValueResponse`.
 
-    ```protobuf
-    message ValueResponse {
-      repeated ParamValue outputs = 1;
-      // TODO: attribute standards fields, e.g. currency, expiry
-    }
-    ```
+        ```protobuf
+        message ValueResponse {
+          repeated ParamValue outputs = 1;
+          // TODO: attribute standards fields, e.g. currency, expiry
+        }
+        ```
 
     3. If the node fails to run the query, it returns an `ErrorResponse`.
 
-    ```protobuf
-    message ErrorResponse {
-      // TODO
-    }
-    ```
+        ```protobuf
+        message ErrorResponse {
+          // TODO
+        }
+        ```
 
     4. If it finishes a query and has not forwarded the `SecondWhilstle` message, it must instead send a `Finish` message to allow the subsequent nodes to clear resources.
 
-    ```protobuf
-    message Finish {
-      bytes queryId = 1;
-    }
-    ```
+        ```protobuf
+        message Finish {
+          bytes queryId = 1;
+        }
+        ```
 
 9. That's it.
