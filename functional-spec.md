@@ -26,7 +26,7 @@
 
 0. When a node wishes to make a query, it looks up the query in the metadata file and examines the available `Choices` for the query. TODO: who looks at the meteadata? Is it the first node "within PDE" or is it another client library that is not in the metadata? E.g. there is a random webserver not part of the network communicating with a trusted PDE node, who looks at the metadata here?
 
-    1. The node should, where possible, expose these choices to the user. 
+    1. The node should, where possible, expose these choices to the user.
 
 1. When a node has decided from the available `Choices`, it creates a query plan using the metadata file according to the following algorithm. 
 
@@ -94,7 +94,7 @@
       Question question = 1;
       bytes queryId = 2;
       Signed<Scope> scope = 3;
-      
+
       // The transaction-id of the scope is the digest. TODO: algorithm.
       message Scope {
         Question originalQuestion = 1;
@@ -121,9 +121,9 @@
       oneof {
         bytes hash = 1;
         RealValue value = 2;
-        EncryptedValue encrypted = 3; 
+        EncryptedValue encrypted = 3;
       }
-    } 
+    }
 
     message RedactableContainer<T> {
       T message = 1;
@@ -138,7 +138,7 @@
 5. The sending node sends the signed query to the first hop node.
 
     1. The sending node should redact the identity fields that are `optional` using the object hashing method TODO: what i sthe object hashing method. c.f. Ben Laurie who is well known.
-    
+
 5. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns a `BadQuery` response. Receiving nodes should check that:
 
     0. The metadata versions are the same
