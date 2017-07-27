@@ -20,6 +20,100 @@
 
 4. TODO doesn't cover how the messaging protocol is sat on top. Any other conditions e.g. disconnecting?
 
+## Metadata
+
+1. The system must be configured with the location of a public metadata file.
+
+    1. All communicating systems must share the same version of the metadata.
+
+    ```protobuf
+    message Validity {
+      string version = 1;
+      Date validFrom = 2;
+      Date validTo = 3;
+    }
+
+    message Endpoint {
+      string ipAddress = 1;
+      uint32 portNumber = 2;
+    }
+
+    message MatchingSet {
+      enum Fields = {
+        SURNAME,
+        POSTCODE,
+        YEAR_OF_BIRTH,
+        ...
+    }
+
+      repeated Fields required = 2;
+      repeated Fields optional = 3;
+    }
+
+    message ImplementingNode {
+      string nodeId = 1;
+      repeated Requirement requirements = 2; // Can be empty
+    }
+
+    // TODO: DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
+    // TODO: do we need DSAs when parties cannot decrypt personal data? (this level of risk should be mitigated by the joining documents for the network)
+    // TODO: Identity bridge server does require being in the DSA and the other two parties must agree on this choice
+    // TODO: does the final DA that processes the identity need to be part of the same DSA as the identity bridge?
+
+    // Is the relationship between SP <-> QS and QS <-> DA the same DSA? Or do you need one each?
+    message SharingLink {
+      string nodeFrom = 2;
+      string nodeTo = 3;
+
+      message Question { string queryName = 1; } // TODO: query params should NOT contain PII
+      message Answer { string queryName = 1; } // TODO: return values should be in here
+      message UnencryptedIdentity { repeated MatchingSet::Fields identityFields = 1; }
+      message EncryptedIdentity { }
+      message ConfidenceAttributes { repeated string types = 1; }
+
+      oneof what {
+        Question question = 4;
+        Answer answer = 5;
+        UnencryptedIdentity uid = 6;
+        EncryptedIdentity eid = 7;
+        ConfidenceAttributes con = 8;
+        // TODO: do we need both identity fields?
+      }
+    }
+
+    message DSA {
+      repeated SharingLink links = 1;
+      string justification = 2; // TODO
+      Date validFrom = 3;
+      Date validTo = 4;
+      string scope = 5;
+
+
+    }
+
+    // TODO: Query contains the identity/confidence attributes, parameters, return values
+    message Query {
+      string name = 1;
+      repeated ImplementingNode nodes = 2;
+      repeated Choice choices = 3;
+    }
+
+    message Choice {
+      repeated string requiredQueries = 1;
+    }
+
+    message Node {
+      string name = 1;
+      Endpoint location = 2;
+      bytes publicKey = 3;
+    }
+
+    message Metadata {
+      Validity validity = 1;
+      repeated Node nodes = 2;
+    }
+    ```
+
 ## Messaging Protocol
 
 ### Querying
