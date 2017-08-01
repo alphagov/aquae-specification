@@ -143,6 +143,8 @@
       Validity validity = 1;
       repeated Node node = 2;
       repeated DSA agreement = 3;
+      repeated Query query = 4;
+      repeated ConfidenceAttributes confidenceAttribute = 5;
     }
     ```
 
