@@ -38,23 +38,6 @@
       uint32 portNumber = 2;
     }
 
-    message MatchingSet {
-      enum Fields = {
-        SURNAME,
-        POSTCODE,
-        YEAR_OF_BIRTH,
-        ...
-    }
-
-      repeated Fields required = 2;
-      repeated Fields optional = 3;
-    }
-
-    message ImplementingNode {
-      string nodeId = 1;
-      repeated Requirement requirements = 2; // Can be empty
-    }
-
     // TODO: DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
     // TODO: do we need DSAs when parties cannot decrypt personal data? (this level of risk should be mitigated by the joining documents for the network)
     // TODO: Identity bridge server does require being in the DSA and the other two parties must agree on this choice
@@ -98,6 +81,26 @@
       repeated Choice choices = 3;
     }
 
+    message MatchingSpec {
+      enum IdFields {
+        SURNAME = 1;
+        POSTCODE = 2;
+        YEAR_OF_BIRTH = 3;
+        INITIALS = 4;
+        HOUSE_NUMBER = 6;
+        DATE_OF_BIRTH = 7;
+      }
+
+      repeated IdFields required = 1;
+      repeated IdFields disambiguators = 2;
+      repeated string confidenceBuilders = 3;
+    }
+
+    message ImplementingNode {
+      string nodeId = 1;
+      MatchingSpec matchingRequirements = 2; // Can be empty
+    }
+
     message Choice {
       repeated string requiredQueries = 1;
     }
@@ -106,6 +109,12 @@
       string name = 1;
       Endpoint location = 2;
       bytes publicKey = 3;
+    }
+
+    message ConfidenceAttribute {
+      string name = 1;
+      string description = 2;
+      // TODO: confirm if type model is required
     }
 
     message Metadata {
