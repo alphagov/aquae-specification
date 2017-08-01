@@ -38,9 +38,10 @@
       uint32 portNumber = 2;
     }
 
-    // TODO: DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
-    // TODO: do we need DSAs when parties cannot decrypt personal data? (this level of risk should be mitigated by the joining documents for the network)
-    // TODO: Identity bridge server does require being in the DSA and the other two parties must agree on this choice
+    // DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
+    // Parties that cannot decrypt the data do not need to be in the DSA.
+    // Identity bridge server does require being in the DSA and the other two parties must agree on this choice
+    // TODO: we will need to include clauses in the agreement that people will not attempt to get access to this data (cannot store it even if they can due to bad crypto)
     // TODO: does the final DA that processes the identity need to be part of the same DSA as the identity bridge?
 
     // Is the relationship between SP <-> QS and QS <-> DA the same DSA? Or do you need one each?
@@ -66,12 +67,33 @@
 
     message DSA {
       repeated SharingLink link = 1;
-      string justification = 2; // TODO
-      Date validFrom = 3;
-      Date validTo = 4;
-      string scope = 5;
+      string justification = 2; // TODO be more clear about what this is
+      Validity validity = 3;
+      string scope = 4;
+      string legalBasis = 5;
+      oneof requiredPermission {
+        ConsentRequirement consent = 6;
+        OnDemandRequirement onDemand = 7;
+        TransparencyRequirement transparency = 8;
+      }
+      oneof recurrance {
+        DoesNotRecur oneShot = 9;
+      }
 
+      message DoesNotRecur {
+      }
 
+      message ConsentRequirement {
+        // Requires user to give explicit consent through a consent server
+        Endpoint consentServer = 1;
+      }
+      message OnDemandRequirement {
+        // SP can execute query when other business process dictate that it's required (i.e. legacy form, user unaware of PDE)
+      }
+      message TransparencyRequirement {
+        // Requires user to have seen the query plan and a record of this from consent/transparency server
+        Endpoint transparencyServer = 1; // TODO: node name
+      }
     }
 
     // TODO: Query contains the identity/confidence attributes, parameters, return values
@@ -120,6 +142,7 @@
     message Metadata {
       Validity validity = 1;
       repeated Node node = 2;
+      repeated DSA agreement = 3;
     }
     ```
 
