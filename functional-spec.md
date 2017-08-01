@@ -1,4 +1,4 @@
-# Functional Specification v0.1
+# Functional Specification v0.2
 
 ## Transport Protocol
 
@@ -7,7 +7,7 @@
     1. Nodes will accept connections on TCP on the port advertised in the metadata file. 
 
 2. All connections to the TCP port must use TLS.
-    
+
     1. All TLS connections MUST only use the algorithms and cipher suites permitted by the TLS v1.3 specification.
     TODO: is TLS v1.3 all authenticated encyption (e.g. MACed, so GCM, AEAD)
     2. Nodes SHOULD use TLS v1.3 where available, but MAY use TLS v1.2, as long as the above requirement is obeyed.
@@ -15,8 +15,7 @@
 3. Both nodes on the TLS connection MUST supply certificates to the other party (mutual TLS).
 
     1. The submitted certificate MUST match the node's entry in the metadata file. TODO: does this allow virtual hosting, where we host multiple query servers from the same port? Do we want to do that?
-    2. The submitted certificate MUST be signed by a trust authority that both nodes trust. TODO: we're trying to _avoid_ doing this. So don't do it.
-    3. If a node submits a certificate that is not in the metadata file entry for that node, the connection MUST be dropped immediately.
+    2. If a node submits a certificate that is not in the metadata file entry for that node, the connection MUST be dropped immediately.
 
 4. TODO doesn't cover how the messaging protocol is sat on top. Any other conditions e.g. disconnecting?
 
@@ -29,8 +28,8 @@
     ```protobuf
     message Validity {
       string version = 1;
-      Date validFrom = 2;
-      Date validTo = 3;
+      string validFrom = 2; // string of RFC-3339
+      string validTo = 3;
     }
 
     message Endpoint {
@@ -159,63 +158,60 @@
 1. When a node has decided from the available `Choices`, it creates a query plan using the metadata file according to the following algorithm. 
 
     0. Start with a empty set of nodes which require the subject's identity (the "identity set").
-    1. The node looks up which node can directly answer the question it wants answered (the "answering node").
+    1. The node looks up which node can directly answer the question it wants answered (the "answering node") by examining the `ImplementingNodes`.
 
         1. If multiple nodes can answer the query, the node should load balance it's requests between all the nodes in the set. TODO: load balancing is messy. Can we exclude this from the MVP and just say each query must come from a specific node? Or: actually work out what problems this will cause and mitigate them.
 
-    2. If the question has a `SubjectIdentity` requirement, the answering node is added to the identity set. TODO: we have deduced that it's not appropriate for matcing requirements to be on the query. Instead, metadata should contain databases, and the queries should link to what database they must query. Then the database contains the `Requirements`.
-    3. The node looks up which subsequent questions must be answered to formulate the answer.
-    4. Steps 1-3 are repeated until the query has been fully resolved down to it's fundamental questions. The node now has a set of nodes which will require the subject identity. TODO: need to resolve the `Choices` of the lower level questions too. How do we present these to the user?
-    5. The node looks up the matching requirement entries for the identity set nodes and computes any fields marked as `optional` that are shared by two or more nodes. The node must submit these fields to all DAs that support them to ensure matching consistency (these fields are then considered `required`).
+    2. If the chosen node has a `MatchingSpec` requirement, the answering node is added to the identity set.
+    3. The node looks up which subsequent questions must be answered to formulate the answer by examining the `requiredQuery` fields.
+    4. Steps 1-3 are repeated until the query has been fully resolved and there are no further required queries. The node now has a set of nodes which will require the subject identity. TODO: need to resolve the `Choices` of the lower level questions too. How do we present these to the user?
+    5. The node looks up the matching requirement entries for the identity set nodes and computes any fields marked as `disambiguating` that are shared by two or more nodes. The node must submit these fields to all DAs that support them to ensure matching consistency (these fields are then considered `required`).
     6. The node then has both the fields required and fields that may subsequently be used for disambiguation or confidence-building for matching (the "match target").
 
-2. The node presents a data entry screen for each matching field to the user. TODO: can't assume we're going to get them from the user. Just specify that they are submitted. DA must match using all fields that are sent, even if it doesn't think it requires them.
+2. The node collects the data required by the identity set nodes. DA must match using all fields that are sent, even if it doesn't think it requires them.
 
-    0. TODO: nodes should receive the mininum amount od data required to do their job. When a node operates, it should use all the data it was given to verify as much correctness as possible.
-    1. It is up to the node to decide what user interface is used and which fields are asked up front. The required fields are the minimum set, but the node may ask for all of the optional fields too.
+    0. TODO: nodes should receive the mininum amount of data required to do their job. When a node operates, it should use all the data it was given to verify as much correctness as possible.
+    1. It is up to the node to decide what user interface is used and which fields are asked up front. The required fields are the minimum set, but the node may ask for all of the disambiguating fields too.
 
-3. Having received match target data, the node submits the match target along with a list of identity set nodes to an Identity Bridge listed in the metadata file. The identity bridge verifies, encrypts and signs the identity for each DA in the identity set. TODO: one query, one node. TODO: does the match target data come from the SP or the bridge in the Verify case?
+3. Having received match target data, the node submits the match target along with a list of identity set nodes to an Identity Bridge with which it has a DSA in the scope of the query it wishes to perform. The identity bridge verifies, encrypts and signs the identity for each DA in the identity set. TODO: does the match target data come from the SP or the bridge in the Verify case? TODO: could/should the IdB run the UI for collection of data? We need to just give the DA the SP identity and then rely on LOGGING to bust them if they are abused. But uh oh, killer question: **how does the audit server know that the DA has lied? can we use canary queries for this?**
 
-    1. The node must also include a session key that will allow the identity set node to communicate in the reverse direction. This is so the identity set node can communicate with the asking node without learning it's identity, and therefore what the query is likely to be. TODO: don't send the session key to the bridge, it doesn't need it. instead just encrypt it for the... oh dear, because now the SP would have to sign the key and the DA would know who it was. We need to just give the DA the SP identity and then rely on LOGGING to bust them if they are abused. But uh oh, killer question: **how does the audit server know that the DA has lied? can we use canary queries for this?**
+  ```protobuf
+  message IdentitySignRequest {
+    PersonIdentity subjectIdentity = 1;
+    // TODO: also need to send the query that we want to run. Then identity bridge verifies.
+    repeated string identitySetNodes = 2;
+  }
 
-    ```protobuf
-    message IdentitySignRequest {
-      PersonIdentity subjectIdentity = 1;
-      // TODO: also need to send the query that we want to run. Then identity bridge verifies.
-      repeated Node identitySet = 2;
-    }
+  message PersonIdentity {
+    string surname = 1;
+    string postcode = 2;
+    uint16 birthYear = 3;
+    string initials = 4; // Initials in little endian Western order
+    string houseNumber = 6;
+    string dateOfBirth = 7; // As an RFC-3339 date
+  }
 
-    message PersonIdentity {
-      string surname = 1;
-      string postcode = 2;
-      uint16 birthYear = 3;
-      string initials = 4; // Initials in little endian Western order
-      string firstName = 5; // TODO: remove this because it's hard to match, useless in the case of e.g. foster kids, shortenings?
-      string houseNumber = 6;
-      Date   dateOfBirth = 7; // TODO: what is data structure?
-      // TODO: does this need to be a key-value structure (For namespacing?) How do we do confidence-building otherwise? For MVP, prob just keep it at DWP fields.. confidence fields should be key-value and relate to a type in the metadata.
-    }
-
-    message SignedIdentity {
-      // TODO: unecrpyted container containing Redactable<T> fields
-      // ID bridge cannot leave fields empty -> all are required
-    }
-    ```
+  message SignedIdentity {
+    // TODO: unecrpyted container containing Redactable<T> fields
+    // ID bridge cannot leave fields empty -> all are required
+  }
+  ```
 
 4. The node creates a payload containing the query to be run and the signed identity, and submits it to a consent service listed in the metadata file. The consent service signs the scope if it's conditions are met or a `BadQueryResponse` if not. The query servers then satisfy themselves that the query being asked of them makes sense within that scope.
 
-    1. The consent service checks that the query is allowed to be asked for this subject now. How it does this is implementation-dependent, but a scheme which asks the subject for their permission or requires an agent to assert they have gained permission is the intention. TODO more? 
+    1. The consent service checks that the query is allowed to be asked for this subject now. How it does this is implementation-dependent, but a scheme which asks the subject for their permission or requires an agent to assert they have gained permission is the intention. TODO more?
 
     ```protobuf
     message Signed<T> {
+      // TODO: this is invalid protobuf, how do we do this more generally?
       T payload = 1;
       bytes signature = 2;
     }
 
     message Question {
       string name = 1;
-      repeated Param inputs = 2;
-      DSA legalAccess = 9; // TODO: interesting that this has ended up here. is it a dragon?
+      // repeated Param inputs = 2; TODO: way of expressing this TBC
+      string dsaId = 9; // TODO: interesting that this has ended up here. is it a dragon?
     }
 
     message Query {
@@ -265,7 +261,7 @@
 
 5. The sending node sends the signed query to the first hop node.
 
-    1. The sending node should redact the identity fields that are `optional` using the object hashing method TODO: what i sthe object hashing method. c.f. Ben Laurie who is well known.
+    1. The sending node should redact the identity fields that are optional using the object hashing method TODO: what i sthe object hashing method. c.f. Ben Laurie who is well known.
 
 5. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns a `BadQuery` response. Receiving nodes should check that:
 
@@ -284,7 +280,7 @@
         StaleMetadata = 0;
         CannotAnswerQuery = 1;
         ServiceUnauthorized = 2;
-        NoConsentToken = 3; // TODO requirements model?
+        NoConsentToken = 3;
         AgentUnauthorized = 4;
         DelegateUnauthorized = 5;
         MissingIdentity = 6;
@@ -301,7 +297,7 @@
 
     1. If it encouters a peice of data that is required from another node, it forms a `Query` payload of it's own and submits that to the next node.
 
-        1. The `name` and `inputs` are defined by whatever information it needs from the next node. The `legalAgreement` is picked from the metadata based on the `scope`. TODO: metadata contains DSAs that are limited to specific scopes.
+        1. The `name` and `inputs` are defined by whatever information it needs from the next node. The `dsaId` is picked from the metadata based on the `scope`.
         2. The `scope` is copied from the previous query.
         3. The `queryId` is a unique id that identifies the conversation between two nodes (as distinct from the transaction-id, which identifies all the conversations answering the highest-level question).
 
@@ -346,7 +342,7 @@
     1. The identity message must contain exactly the fields it did previously along with every field that was additionally requested by  one or more nodes.
     2. The same set of fields must be sent to each node.
 
-7. When the origin node has received responses from all of the identity  nodes, it sends a `SecondWhistle` message along the query path to tell the query servers to begin executing the query logic against the data from the matched records. Once the `SecondWhilste` has been processed, the node can finalise the transaction and clear resources - no further messages for this `queryId` are permitted.
+7. When the origin node has received responses from all of the identity nodes, it sends a `SecondWhistle` message along the query path to tell the query servers to begin executing the query logic against the data from the matched records. Once the `SecondWhilste` has been processed, the node can finalise the transaction and clear resources - no further messages for this `queryId` are permitted.
 
     ```protobuf
     message SecondWhistle {
@@ -357,7 +353,7 @@
 
 8. The nodes on the query path execute the query logic.
 
-    1. If the node requires data from another node, it passes on the `SecondWhistle` message to that node and awaits the `ExecResponse`. It is up to the node when and if it actually forwards the `SecondWhistle` message (for instance, it may concurrently request all data or it may wait until it has evaluated earlier branches in an OR-type condition). It should only send the `SecondWhistle` if it requires the data.
+    1. If the node requires data from another node, it passes on the `SecondWhistle` message to that node and awaits the `QueryAnswer`. It is up to the node when and if it actually forwards the `SecondWhistle` message (for instance, it may concurrently request all data or it may wait until it has evaluated earlier branches in an OR-type condition). It should only send the `SecondWhistle` if it requires the data.
 
         ```protobuf
         message QueryAnswer {
