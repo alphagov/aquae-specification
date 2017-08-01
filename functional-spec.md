@@ -65,7 +65,7 @@
     }
 
     message DSA {
-      repeated SharingLink links = 1;
+      repeated SharingLink link = 1;
       string justification = 2; // TODO
       Date validFrom = 3;
       Date validTo = 4;
@@ -77,8 +77,8 @@
     // TODO: Query contains the identity/confidence attributes, parameters, return values
     message Query {
       string name = 1;
-      repeated ImplementingNode nodes = 2;
-      repeated Choice choices = 3;
+      repeated ImplementingNode node = 2;
+      repeated Choice choice = 3;
     }
 
     message MatchingSpec {
@@ -102,7 +102,7 @@
     }
 
     message Choice {
-      repeated string requiredQueries = 1;
+      repeated string requiredQuery = 1;
     }
 
     message Node {
@@ -119,7 +119,7 @@
 
     message Metadata {
       Validity validity = 1;
-      repeated Node nodes = 2;
+      repeated Node node = 2;
     }
     ```
 
@@ -206,7 +206,7 @@
         PersonIdentity delegateIdentity = 4;
         ClientIdentity agentIdentity = 5;
         ServiceIdentity serviceIdentity = 6;
-        repeated Choice choices = 8; // TODO: ???
+        repeated Choice choice = 8;
       }
     }
 
