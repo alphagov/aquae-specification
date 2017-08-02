@@ -33,14 +33,14 @@
 
     ```protobuf
     message Validity {
-      string version = 1;
-      string validFrom = 2; // string of RFC-3339
-      string validTo = 3;
+      optional string version = 1;
+      optional string validFrom = 2; // string of RFC-3339
+      optional string validTo = 3;
     }
 
     message Endpoint {
-      string ipAddress = 1;
-      uint32 portNumber = 2;
+      optional string ipAddress = 1;
+      optional uint32 portNumber = 2;
     }
 
     // DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
@@ -51,11 +51,11 @@
 
     // Is the relationship between SP <-> QS and QS <-> DA the same DSA? Or do you need one each?
     message SharingLink {
-      string nodeFrom = 2;
-      string nodeTo = 3;
+      optional string nodeFrom = 2;
+      optional string nodeTo = 3;
 
-      message Question { string queryName = 1; } // TODO: query params should NOT contain PII
-      message Answer { string queryName = 1; } // TODO: return values should be in here
+      message Question { optional string queryName = 1; } // TODO: query params should NOT contain PII
+      message Answer { optional string queryName = 1; } // TODO: return values should be in here
       message UnencryptedIdentity { repeated MatchingSet::Fields identityFields = 1; }
       message EncryptedIdentity { }
       message ConfidenceAttributes { repeated string types = 1; }
@@ -72,10 +72,10 @@
 
     message DSA {
       repeated SharingLink link = 1;
-      string justification = 2; // TODO be more clear about what this is
-      Validity validity = 3;
-      string scope = 4;
-      string legalBasis = 5;
+      optional string justification = 2; // TODO be more clear about what this is
+      optional Validity validity = 3;
+      optional string scope = 4;
+      optional string legalBasis = 5;
       oneof requiredPermission {
         ConsentRequirement consent = 6;
         OnDemandRequirement onDemand = 7;
@@ -90,20 +90,20 @@
 
       message ConsentRequirement {
         // Requires user to give explicit consent through a consent server
-        Endpoint consentServer = 1;
+        optional Endpoint consentServer = 1;
       }
       message OnDemandRequirement {
         // SP can execute query when other business process dictate that it's required (i.e. legacy form, user unaware of PDE)
       }
       message TransparencyRequirement {
         // Requires user to have seen the query plan and a record of this from consent/transparency server
-        Endpoint transparencyServer = 1; // TODO: node name
+        optional Endpoint transparencyServer = 1; // TODO: node name
       }
     }
 
     // TODO: Query contains the identity/confidence attributes, parameters, return values
     message Query {
-      string name = 1;
+      optional string name = 1;
       repeated ImplementingNode node = 2;
       repeated Choice choice = 3;
     }
@@ -124,8 +124,8 @@
     }
 
     message ImplementingNode {
-      string nodeId = 1;
-      MatchingSpec matchingRequirements = 2; // Can be empty
+      optional string nodeId = 1;
+      optional MatchingSpec matchingRequirements = 2; // Can be empty
     }
 
     message Choice {
@@ -133,19 +133,19 @@
     }
 
     message Node {
-      string name = 1;
-      Endpoint location = 2;
-      bytes publicKey = 3;
+      optional string name = 1;
+      optional Endpoint location = 2;
+      optional bytes publicKey = 3;
     }
 
     message ConfidenceAttribute {
-      string name = 1;
-      string description = 2;
+      optional string name = 1;
+      optional string description = 2;
       // TODO: confirm if type model is required
     }
 
     message Metadata {
-      Validity validity = 1;
+      optional Validity validity = 1;
       repeated Node node = 2;
       repeated DSA agreement = 3;
       repeated Query query = 4;
@@ -183,18 +183,18 @@
 
   ```protobuf
   message IdentitySignRequest {
-    PersonIdentity subjectIdentity = 1;
+    optional PersonIdentity subjectIdentity = 1;
     // TODO: also need to send the query that we want to run. Then identity bridge verifies.
     repeated string identitySetNodes = 2;
   }
 
   message PersonIdentity {
-    string surname = 1;
-    string postcode = 2;
-    uint16 birthYear = 3;
-    string initials = 4; // Initials in little endian Western order
-    string houseNumber = 6;
-    string dateOfBirth = 7; // As an RFC-3339 date
+    optional string surname = 1;
+    optional string postcode = 2;
+    optional uint32 birthYear = 3;
+    optional string initials = 4; // Initials in little endian Western order
+    optional string houseNumber = 6;
+    optional string dateOfBirth = 7; // As an RFC-3339 date
   }
 
   message SignedIdentity {
@@ -210,56 +210,56 @@
     ```protobuf
     message Signed<T> {
       // TODO: this is invalid protobuf, how do we do this more generally?
-      T payload = 1;
-      bytes signature = 2;
+      optional T payload = 1;
+      optional bytes signature = 2;
     }
 
     message Question {
-      string name = 1;
+      optional string name = 1;
       // repeated Param inputs = 2; TODO: way of expressing this TBC
-      string dsaId = 9; // TODO: interesting that this has ended up here. is it a dragon?
+      optional string dsaId = 9; // TODO: interesting that this has ended up here. is it a dragon?
     }
 
     message Query {
-      Question question = 1;
-      bytes queryId = 2;
-      Signed<Scope> scope = 3;
+      optional Question question = 1;
+      optional bytes queryId = 2;
+      optional SignedScope scope = 3;
 
       // The transaction-id of the scope is the digest. TODO: algorithm.
       message Scope {
-        Question originalQuestion = 1;
-        bytes nOnce = 2; // Monotonically increasing value set by CS
-        SignedIdentity subjectIdentity = 3;
-        PersonIdentity delegateIdentity = 4;
-        ClientIdentity agentIdentity = 5;
-        ServiceIdentity serviceIdentity = 6;
+        optional Question originalQuestion = 1;
+        optional bytes nOnce = 2; // Monotonically increasing value set by CS
+        optional SignedIdentity subjectIdentity = 3;
+        optional PersonIdentity delegateIdentity = 4;
+        optional ClientIdentity agentIdentity = 5;
+        optional ServiceIdentity serviceIdentity = 6;
         repeated Choice choice = 8;
       }
     }
 
     message Redactable<T> {
       message RealValue {
-        int salt = 1;
-        T value = 2;
+        optional int salt = 1;
+        optional T value = 2;
       }
 
       message EncryptedValue {
-        bytes hash = 1;
-        bytes blob = 2;
+        optional bytes hash = 1;
+        optional bytes blob = 2;
       }
 
       oneof {
-        bytes hash = 1;
-        RealValue value = 2;
-        EncryptedValue encrypted = 3;
+        optional bytes hash = 1;
+        optional RealValue value = 2;
+        optional EncryptedValue encrypted = 3;
       }
     }
 
     message RedactableContainer<T> {
-      T message = 1;
-      bytes rootHash = 2;
-      bytes signatureOfHash = 3;
-      map<string, bytes> nodeKeys = 4;
+      optional T message = 1;
+      optional bytes rootHash = 2;
+      optional bytes signatureOfHash = 3;
+      optional map<string, bytes> nodeKeys = 4;
     }
 
     SignedQuery = RedactableContainer<Query>
@@ -294,8 +294,8 @@
         MissingIdentityFields = 8;
       } // TODO: NCSC: how detailed is this in non-debug?
 
-      bytes queryId = 1;
-      Reason reason = 2;
+      optional bytes queryId = 1;
+      optional Reason reason = 2;
     }
     ```
 
@@ -311,7 +311,7 @@
 
     ```protobuf
     message QueryResponse {
-      bytes queryId = 1;
+      optional bytes queryId = 1;
       oneof result = {
         ValueResponse valueResponse = 1;
         MoreIdentityResponse moreIdentityResponse = 2;
@@ -330,7 +330,7 @@
           repeated string fields = 1;
         }
 
-        Encrypted<IdentityFields> encryptedIdentityFields = 1;
+        optional bytes encryptedIdentityFields = 1;
       } // TODO: encryption
       ```
 
@@ -352,7 +352,7 @@
 
     ```protobuf
     message SecondWhistle {
-      bytes queryId = 1;
+      optional bytes queryId = 1;
       // TODO: how do we ensure this comes from the SP??
     }
     ``` 
@@ -363,7 +363,7 @@
 
         ```protobuf
         message QueryAnswer {
-          bytes queryId = 1;
+          optional bytes queryId = 1;
           oneof result {
             ValueResponse value = 2;
             ErrorResponse error = 3;
@@ -392,7 +392,7 @@
 
         ```protobuf
         message Finish {
-          bytes queryId = 1;
+          optional bytes queryId = 1;
         }
         ```
 
