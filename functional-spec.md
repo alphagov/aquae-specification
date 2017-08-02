@@ -1,5 +1,7 @@
 # Functional Specification v0.2
 
+This specification is in **ALPHA** and is liable to be changed or completely deleted at any time.
+
 ## Transport Protocol
 
 1. PDE nodes will establish connections over TCP.
