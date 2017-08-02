@@ -14,4 +14,4 @@ function Get-CodeBlocks ($file, $language) {
     ForEach-Object { $_.groups[1].value }
 }
 
-(Get-CodeBlocks .\functional-spec.md 'protobuf') | Out-File .\pde.proto
+(Get-CodeBlocks .\functional-spec.md 'protobuf') | Out-File .\pde.proto -Encoding utf8
