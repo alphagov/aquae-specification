@@ -23,6 +23,12 @@
 
 1. The system must be configured with the location of a public metadata file.
 
+    0. Metadata is represented using a Protocol Buffer structure.
+
+    ```protobuf
+    syntax = "proto2";
+    ```
+
     1. All communicating systems must share the same version of the metadata.
 
     ```protobuf
