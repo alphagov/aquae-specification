@@ -56,7 +56,7 @@
 
       message Question { optional string queryName = 1; } // TODO: query params should NOT contain PII
       message Answer { optional string queryName = 1; } // TODO: return values should be in here
-      message UnencryptedIdentity { repeated MatchingSet::Fields identityFields = 1; }
+      message UnencryptedIdentity { repeated MatchingSpec.IdFields identityFields = 1; }
       message EncryptedIdentity { }
       message ConfidenceAttributes { repeated string types = 1; }
 
@@ -102,7 +102,7 @@
     }
 
     // TODO: Query contains the identity/confidence attributes, parameters, return values
-    message Query {
+    message QuerySpec {
       optional string name = 1;
       repeated ImplementingNode node = 2;
       repeated Choice choice = 3;
@@ -148,8 +148,8 @@
       optional Validity validity = 1;
       repeated Node node = 2;
       repeated DSA agreement = 3;
-      repeated Query query = 4;
-      repeated ConfidenceAttributes confidenceAttribute = 5;
+      repeated QuerySpec query = 4;
+      repeated ConfidenceAttribute confidenceAttribute = 5;
     }
     ```
 
@@ -197,6 +197,14 @@
     optional string dateOfBirth = 7; // As an RFC-3339 date
   }
 
+  message ClientIdentity {
+    // TODO: identity of an agent/client
+  }
+
+  message ServiceIdentity {
+    // TODO: identity of the service making the request
+  }
+
   message SignedIdentity {
     // TODO: unecrpyted container containing Redactable<T> fields
     // ID bridge cannot leave fields empty -> all are required
@@ -208,11 +216,12 @@
     1. The consent service checks that the query is allowed to be asked for this subject now. How it does this is implementation-dependent, but a scheme which asks the subject for their permission or requires an agent to assert they have gained permission is the intention. TODO more?
 
     ```protobuf
+    /* The pattern for signed messages is:
     message Signed<T> {
-      // TODO: this is invalid protobuf, how do we do this more generally?
       optional T payload = 1;
       optional bytes signature = 2;
     }
+    */
 
     message Question {
       optional string name = 1;
@@ -235,8 +244,14 @@
         optional ServiceIdentity serviceIdentity = 6;
         repeated Choice choice = 8;
       }
+
+      message SignedScope {
+        optional Scope scope = 1;
+        optional bytes signature = 2;
+      }
     }
 
+    /* The pattern for redactable data structures is:
     message Redactable<T> {
       message RealValue {
         optional int salt = 1;
@@ -254,15 +269,21 @@
         optional EncryptedValue encrypted = 3;
       }
     }
+    */
 
+    /* The pattern for redactable containers is:
     message RedactableContainer<T> {
       optional T message = 1;
       optional bytes rootHash = 2;
       optional bytes signatureOfHash = 3;
       optional map<string, bytes> nodeKeys = 4;
     }
+    */
 
-    SignedQuery = RedactableContainer<Query>
+    message SignedQuery {
+      optional Query query = 1;
+      optional bytes signature = 2;
+    }
     ```
 
 5. The sending node sends the signed query to the first hop node.
@@ -282,7 +303,7 @@
 
     ```protobuf
     message BadQueryResponse {
-      enum Reason = {
+      enum Reason {
         StaleMetadata = 0;
         CannotAnswerQuery = 1;
         ServiceUnauthorized = 2;
@@ -312,10 +333,9 @@
     ```protobuf
     message QueryResponse {
       optional bytes queryId = 1;
-      oneof result = {
-        ValueResponse valueResponse = 1;
-        MoreIdentityResponse moreIdentityResponse = 2;
-        NoMatchResponse noMatchResponse = 3;
+      oneof result {
+        MoreIdentityResponse moreIdentityResponse = 3;
+        MatchCompleteResponse matchCompleteResponse = 4;
       }
     }
     ```
@@ -375,7 +395,7 @@
 
         ```protobuf
         message ValueResponse {
-          repeated ParamValue outputs = 1;
+          // TODO: how do we represent this?
           // TODO: attribute standards fields, e.g. currency, expiry
         }
         ```
