@@ -157,6 +157,13 @@ This specification is in **ALPHA** and is liable to be changed or completely del
 
 ## Messaging Protocol
 
+0. The Messaging Protool is represented on the wire using a Protocol Buffer
+structure.
+
+    ```protobuf
+    syntax = "proto2";
+    ```
+
 ### Querying
 
 0. When a node wishes to make a query, it looks up the query in the metadata file and examines the available `Choices` for the query. TODO: who looks at the meteadata? Is it the first node "within PDE" or is it another client library that is not in the metadata? E.g. there is a random webserver not part of the network communicating with a trusted PDE node, who looks at the metadata here?
