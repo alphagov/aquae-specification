@@ -4,6 +4,7 @@
 
     ```protobuf
     syntax = "proto2";
+    package Aquae.Messaging;
     ```
 
 ## Querying

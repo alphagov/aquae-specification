@@ -6,6 +6,7 @@
 
     ```protobuf
     syntax = "proto2";
+    package Aquae.Metadata;
     ```
 
     1. All communicating systems must share the same version of the metadata.
