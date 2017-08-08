@@ -4,7 +4,7 @@ This specification is in **ALPHA** and is liable to be changed or completely del
 
 ## Transport Protocol
 
-1. PDE nodes will establish connections over TCP.
+1. Aquae nodes will establish connections over TCP.
 
     1. Nodes will accept connections on TCP on the port advertised in the metadata file. 
 
@@ -45,7 +45,7 @@ This specification is in **ALPHA** and is liable to be changed or completely del
       optional uint32 portNumber = 2;
     }
 
-    // DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (PDE?)
+    // DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (Aquae network?)
     // Parties that cannot decrypt the data do not need to be in the DSA.
     // Identity bridge server does require being in the DSA and the other two parties must agree on this choice
     // TODO: we will need to include clauses in the agreement that people will not attempt to get access to this data (cannot store it even if they can due to bad crypto)
@@ -95,7 +95,7 @@ This specification is in **ALPHA** and is liable to be changed or completely del
         optional Endpoint consentServer = 1;
       }
       message OnDemandRequirement {
-        // SP can execute query when other business process dictate that it's required (i.e. legacy form, user unaware of PDE)
+        // SP can execute query when other business process dictate that it's required (i.e. legacy form, user unaware of Aquae)
       }
       message TransparencyRequirement {
         // Requires user to have seen the query plan and a record of this from consent/transparency server
@@ -166,7 +166,7 @@ structure.
 
 ### Querying
 
-0. When a node wishes to make a query, it looks up the query in the metadata file and examines the available `Choices` for the query. TODO: who looks at the meteadata? Is it the first node "within PDE" or is it another client library that is not in the metadata? E.g. there is a random webserver not part of the network communicating with a trusted PDE node, who looks at the metadata here?
+0. When a node wishes to make a query, it looks up the query in the metadata file and examines the available `Choices` for the query. TODO: who looks at the meteadata? Is it the first node within the Aquae network or is it another client library that is not in the metadata? E.g. there is a random webserver not part of the network communicating with a trusted Aquae node, who looks at the metadata here?
 
     1. The node should, where possible, expose these choices to the user.
 
