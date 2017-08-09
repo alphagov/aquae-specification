@@ -81,6 +81,10 @@
       optional string dsaId = 9; // TODO: interesting that this has ended up here. is it a dragon?
     }
 
+    message Choice {
+      repeated string requiredQuery = 1;
+    }
+
     message Query {
       optional Question question = 1;
       optional bytes queryId = 2;
@@ -94,7 +98,7 @@
         optional PersonIdentity delegateIdentity = 4;
         optional ClientIdentity agentIdentity = 5;
         optional ServiceIdentity serviceIdentity = 6;
-        repeated Choice choice = 8;
+        repeated Choice choice = 7;
       }
 
       message SignedScope {
