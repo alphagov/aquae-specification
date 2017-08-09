@@ -14,5 +14,10 @@ function Get-CodeBlocks ($file, $language) {
     ForEach-Object { $_.groups[1].value }
 }
 
-(Get-CodeBlocks .\metadata.md 'protobuf') | Out-File .\metadata.proto -Encoding utf8
-(Get-CodeBlocks .\messaging.md 'protobuf') | Out-File .\messaging.proto -Encoding utf8
+function Write-Protobuf ($base) {
+  (Get-CodeBlocks ".\$base.md" 'protobuf') | Out-File ".\$base.proto" -Encoding utf8
+}
+
+Write-Protobuf 'metadata'
+Write-Protobuf 'messaging'
+Write-Protobuf 'transport'
