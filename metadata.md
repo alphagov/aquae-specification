@@ -1,6 +1,6 @@
-# Metadata
+# Federation Metadata
 
-1. The system must be configured with the location of a public metadata file.
+1. The system must be configured with the location of a public federation metadata file.
 
     0. Metadata is represented using a Protocol Buffer structure.
 
@@ -14,7 +14,7 @@
     option java_generic_services  = false;
     ```
 
-    1. All communicating systems must share the same version of the metadata.
+    1. All communicating systems must share the same version of the federation metadata.
 
     ```protobuf
     message Validity {
@@ -129,7 +129,7 @@
       // TODO: confirm if type model is required
     }
 
-    message Metadata {
+    message Federation {
       optional Validity validity = 1;
       repeated Node node = 2;
       repeated DSA agreement = 3;
