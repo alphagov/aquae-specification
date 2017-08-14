@@ -37,19 +37,19 @@ The [Messaging Protocol](./messaging.md) is composed of messages specified using
 
    ```protobuf
    message Header {
-     enum Type {
-       IDENTITY_SIGN_REQUEST = 1;
-       // FIXME: Where is the response to IDENTITY_SIGN_REQUEST?
-       SIGNED_QUERY          = 2;
-       BAD_QUERY_RESPONSE    = 3;
-       QUERY_RESPONSE        = 4;
-       SECOND_WHISTLE        = 5;
-       QUERY_ANSWER          = 6;
-       FINISH                = 7;
-     }
+	   enum Type {
+		   IDENTITY_SIGN_REQUEST = 1;
+		   // FIXME: Where is the response to IDENTITY_SIGN_REQUEST?
+		   SIGNED_QUERY          = 2;
+		   BAD_QUERY_RESPONSE    = 3;
+		   QUERY_RESPONSE        = 4;
+		   SECOND_WHISTLE        = 5;
+		   QUERY_ANSWER          = 6;
+		   FINISH                = 7;
+	   }
 
-     optional uint32 length = 1;
-     optional Type   type   = 2;
+	   optional int32  length = 1;
+	   optional Type   type   = 2;
    }
    ```
 3. The Header message must not ever be more than 255 bytes long.

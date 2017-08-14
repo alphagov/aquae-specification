@@ -48,7 +48,7 @@
   message PersonIdentity {
     optional string surname = 1;
     optional string postcode = 2;
-    optional uint32 birthYear = 3;
+    optional int32  birthYear = 3;
     optional string initials = 4; // Initials in little endian Western order
     optional string houseNumber = 6;
     optional string dateOfBirth = 7; // As an RFC-3339 date
