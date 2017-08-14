@@ -120,7 +120,7 @@
     message Node {
       optional string name = 1;
       optional Endpoint location = 2;
-      optional bytes publicKey = 3;
+      optional bytes certificate = 3; // X509 certificate in DER format
     }
 
     message ConfidenceAttribute {
