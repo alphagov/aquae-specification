@@ -54,7 +54,7 @@
     optional string dateOfBirth = 7; // As an RFC-3339 date
   }
 
-  message ClientIdentity {
+  message AgentIdentity {
     // TODO: identity of an agent/client
   }
 
@@ -101,7 +101,7 @@
         optional bytes nOnce = 2; // Monotonically increasing value set by CS
         optional SignedIdentity subjectIdentity = 3;
         optional PersonIdentity delegateIdentity = 4;
-        optional ClientIdentity agentIdentity = 5;
+        optional AgentIdentity agentIdentity = 5;
         optional ServiceIdentity serviceIdentity = 6;
         repeated Choice choice = 7;
       }
