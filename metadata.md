@@ -7,6 +7,11 @@
     ```protobuf
     syntax = "proto2";
     package Aquae.Metadata;
+    option java_package           = "uk.gov.Aquae.ProtocolBuffers";
+    option java_outer_classname   = "Metadata";
+    option java_multiple_files    = false;
+    option java_string_check_utf8 = true;
+    option java_generic_services  = false;
     ```
 
     1. All communicating systems must share the same version of the metadata.

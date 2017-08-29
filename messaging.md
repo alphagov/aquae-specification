@@ -5,6 +5,11 @@
     ```protobuf
     syntax = "proto2";
     package Aquae.Messaging;
+    option java_package           = "uk.gov.Aquae.ProtocolBuffers";
+    option java_outer_classname   = "Messaging";
+    option java_multiple_files    = false;
+    option java_string_check_utf8 = true;
+    option java_generic_services  = false;
     ```
 
 ## Querying

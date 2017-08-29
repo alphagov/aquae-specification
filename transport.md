@@ -26,6 +26,11 @@ The [Messaging Protocol](./messaging.md) is composed of messages specified using
     ```protobuf
     syntax = "proto2";
     package Aquae.Transport;
+    option java_package           = "uk.gov.Aquae.ProtocolBuffers";
+    option java_outer_classname   = "Transport";
+    option java_multiple_files    = false;
+    option java_string_check_utf8 = true;
+    option java_generic_services  = false;
     ```
 2. The Encapsulation Protocol consists of a Header describing the Length and
    Type of the [Messaging Protocol](./messaging.md) message that follows.
