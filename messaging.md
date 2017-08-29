@@ -149,7 +149,7 @@
 
 5. The sending node sends the signed query to the first hop node.
 
-    1. The sending node should redact the identity fields that are optional using the object hashing method TODO: what i sthe object hashing method. c.f. Ben Laurie who is well known.
+    1. The sending node should redact the identity fields that are optional using the object hashing method TODO: what is the object hashing method. c.f. Ben Laurie who is well known.
 
 5. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns a `BadQuery` response. Receiving nodes should check that:
 
