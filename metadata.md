@@ -24,8 +24,8 @@
     }
 
     message Endpoint {
-      optional string ipAddress = 1;
-      optional int32  portNumber = 2;
+      optional string hostname = 1; // must be a domain name, a dotted quad IPv4 or an IPv6 enclosed in square brackets.
+      optional int32  port_number = 2;
     }
 
     // DSA contains the parties (from/to), the consent requirements, the identity/confidence attributes, parameters, return values, what the purpose is (lo-level), when (if citizen is present, recurrance etc.), validity dates, justification (hi-level scope), legal basis, how (Aquae network?)
