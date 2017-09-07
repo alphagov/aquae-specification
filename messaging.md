@@ -63,8 +63,8 @@
   }
 
   message SignedIdentity {
-    // TODO: unecrpyted container containing Redactable<T> fields
-    // ID bridge cannot leave fields empty -> all are required
+    optional PersonIdentity identity = 1;
+    // TODO: add signature info and merkel tree
   }
   ```
 
