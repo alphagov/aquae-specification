@@ -12,6 +12,23 @@
     option java_generic_services  = false;
     ```
 
+## Protocol
+
+The Aquae Messaging Protocol consists of messages sent back and forth. It is not strictly a request/response style protocol. For now it is client server: a server listens for connections and a client opens a connection. When the converstaion is over, if neither peer closes the connection, it can be reused but the roles of the client and the server may not change.
+
+This document outlines a number of Protocol Buffer Messages. Ones called `*Request` are suitable for a client to send to a server. Ones called `*Response` are suitable for a server to send back to a client. The server does not always have to have received a Request in order to be able to send a Response: unsolicited Responses are allowed and the client must handle them. All other Protocol Buffer Messages are definitions of domain level objects which are used by the Request/Response messages.
+
+The server and client both need to implement a state machine. Not all Request or Response messages are appropriate in every state. If a server or a client sends an unexpected or inappropriate message, the receiving side should reply with a MessagingError message and close the connection. The recieving peer should log the Error and discard the associated connection and state, propagating the error condition to both upstream and downstream peers that are part of the Aquae transaction.
+
+TODO: This should probably be signed so that intermediate nodes can't cause too much trouble and result in a split-brain view of an Aquae transaction.
+
+  ```protobuf
+  message MessagingError {
+    optional string origin = 1; // Node name of the originating node.
+    optional string reason = 2; // Human readable explanation of the error condition.
+  }
+  ```
+
 ## Querying
 
 0. When a node wishes to make a query, it looks up the query in the metadata file and examines the available `Choices` for the query. TODO: who looks at the meteadata? Is it the first node within the Aquae network or is it another client library that is not in the metadata? E.g. there is a random webserver not part of the network communicating with a trusted Aquae node, who looks at the metadata here?
