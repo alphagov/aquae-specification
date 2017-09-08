@@ -27,7 +27,7 @@
 
     2. If the chosen node has a `MatchingSpec` requirement, the answering node is added to the identity set.
     3. The node looks up which subsequent questions must be answered to formulate the answer by examining the `requiredQuery` fields.
-    4. Steps 1-3 are repeated until the query has been fully resolved and there are no further required queries. The node now has a set of nodes which will require the subject identity. TODO: need to resolve the `Choices` of the lower level questions too. How do we present these to the user?
+    4. Steps 1-3 are repeated until the query has been fully resolved and there are no further required queries. (It is up to the implementation to detect and prevent infinite loops but a correct parse of the Metadata will ensure this.) The node now has a set of nodes which will require the subject identity. TODO: need to resolve the `Choices` of the lower level questions too. How do we present these to the user?
     5. The node looks up the matching requirement entries for the identity set nodes and computes any fields marked as `disambiguating` that are shared by two or more nodes. The node must submit these fields to all DAs that support them to ensure matching consistency (these fields are then considered `required`).
     6. The node then has both the fields required and fields that may subsequently be used for disambiguation or confidence-building for matching (the "match target").
 
