@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Helper to create an Aquae Metadata Node entry in Protobuf Text Format.
+#
+# Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09
+
+
+usage() {
+cat >&2 <<EOF
+Usage: `basename $0` <node-name> <hostname> <port> <certificate>"
+Create an Aquae Metadata Node entry in Protobuf Text Format.
+
+	<node-name>   - The human readable name of the node. This name will be
+			used to reference the node in other parts of the
+			Metadata file.
+
+	<hostname>    - The IPv4, IPv6 or Fully Qualified DNS name of the node.
+
+	<port>        - The TCP port that other nodes can contact this node on.
+
+	<certificate> - The node's public key, embedded in a self-signed
+			certificate, encoded in DER format. This certificate
+			should have the clientAuth and serverAuth objects in
+			the certificate's trusted use section. Consult the
+			Makefile in the Aquae Specification examples/ directory
+			for hints and tools for generating an appropriate
+			certificate.
+EOF
+exit 1
+}
+
+die() {
+	echo $@ >&2
+	exit 1
+}
+
+
+if [ $# -ne 4 ]; then
+	usage
+fi
+
+NODENAME=$1
+HOSTNAME=$2
+PORT=$3
+CERTIFICATE=$4
+
+if [ ! -f $CERTIFICATE ]; then
+	die "Certificate file not found: $CERTIFICATE"
+fi
+
+if ! file $CERTIFICATE | cut -f2 -d: | grep "^ data$" > /dev/null; then
+	echo "Certificate $CERTIFICATE is probably not in the correct format!" >&2
+	echo ""
+	usage
+fi
+
+
+cat <<EOF
+node {
+	name: "$NODENAME"
+	location {
+		hostname: "$HOSTNAME"
+		port_number: $PORT
+	}
+	certificate: "$(od -vb $CERTIFICATE |cut -s -f2- -d' ' | sed -e 's/ /\\/g' -e 's/^/\\/' | tr -d '\n')"
+}
+
+EOF
+

@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Helper to create an Aquae Metadata Validity entry in Protobuf Text Format.
+#
+# Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09/07
+
+
+usage() {
+cat >&2 <<EOF
+Usage: `basename $0` <days>"
+Create an Aquae Metadata Validity entry in Protobuf Text Format.
+
+	<days> - The number of days (from now) that the metadata should be
+	         valid for.
+EOF
+exit 1
+}
+
+die() {
+	echo $@ >&2
+	exit 1
+}
+
+fmt_date() {
+	date --date=@$@ -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+
+if [ $# -ne 1 ]; then
+	usage
+fi
+
+DAYS=$1
+NOW=$(date '+%s')
+EXPIRY=$(($NOW+$DAYS*60*60*24))
+NOW=$(fmt_date $NOW)
+EXPIRY=$(fmt_date $EXPIRY)
+
+
+cat <<EOF
+
+################################################################################
+# Validity section for this Metadata file.
+
+validity {
+        version: "1"
+        validFrom: "$NOW"
+        validTo:   "$EXPIRY"
+}
+
+EOF
+

@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Helper to create an Aquae Metadata Confidence Attribute entry in Protobuf
+# Text Format.
+#
+# Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09/07
+
+
+usage() {
+cat >&2 <<EOF
+Usage: `basename $0` <name> <description>"
+Create an Aquae Metadata Confidence Attribute entry in Protobuf Text Format.
+
+	<name>        - The symbolic name of the Confidence Attribute. This
+			will be used to reference the Confidence Attribute in
+			other parts of the Metadata file.
+
+	<description> - The friendly text that will be shown to the user in
+			order to describe what the Confidence Attribute is.
+EOF
+exit 1
+}
+
+die() {
+	echo $@ >&2
+	exit 1
+}
+
+fmt_date() {
+	date --date=@$@ -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+
+if [ $# -ne 2 ]; then
+	usage
+fi
+
+NAME=$1
+DESC=$2
+
+
+cat <<EOF
+confidenceAttribute {
+        name: "$NAME"
+        description: "$DESC"
+}
+
+EOF
+
