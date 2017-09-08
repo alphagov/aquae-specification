@@ -1,0 +1,74 @@
+#!/bin/sh
+
+################################################################################
+#
+# Aquae Metadata Compiler
+#
+# amc is a program that takes a human readable, text version of the metadata
+# file, converts it into Protobufs and then does some business rule and
+# consistency checking before writing it out to a file. The parsing into
+# Protobufs happens right at the start of the process so that `amc` is strictly
+# optional: we reuse the text serialisation of Protobufs as it meets our needs
+# and, in a pinch, we can substitute `protoc --encode=Aquae.Metadata.Federation
+# metadata.proto` in lieu of amc.
+# However, this is a very early cut of the code and we don't currently
+# implement or enforce any extra checks beyond what protoc gives us. Right now,
+# the main benefit of this shim is to make it easy to invoke protoc.
+#
+#
+# For expediency at the beginning of the project, we chose to represent the
+# federation metadata file using Google's Protocol Buffers as we were already
+# using them for the transport and messaging layers. This has a number of
+# advantages but we are also aware that it has a number of disadvantages!
+#
+#   Advantages:
+#     + No extra dependencies soley for metadata processing.
+#     + No increase in attack surface due to no extra dependencies.
+#     + Straightfoward way of specifying the schema and types that we'd
+#       otherwise have to build on top of a format such as JSON, YAML or XML.
+#     + Minimal parsing and memory overhead for node software.
+#         - Large SAML Federations have signigicant per node memory
+#           requirements for their metadata.
+#
+#   Disadvantages:
+#     + Difficult to eyeball.
+#         - Even a text format would benefit from visualisers and we're
+#           building these for the transport and messaging anyway.
+#     + Requires a separate compilation step.
+#         - Even a text format would benefit from validators and we get the a
+#           trivial one for free in protoc.
+#
+#
+# Andy Bennett Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/08/07
+#
+################################################################################
+
+# Requirements
+#
+#  + Ensure "exactly one of" for the "oneof" clauses.
+#  + Ensure required fields are present (most of them are required).
+
+ME=$(readlink -fn $0)
+MY_DIR=$(dirname $ME)
+
+usage() {
+cat >&2 <<EOF
+Usage: `basename $0` <filename>
+Convert an Aquae Metadata File in Protobuf Text Format to an Aquae Metadata
+File in Protobuf Binary Format, suitable for consumption by Aquae
+implementations.
+Beware that this tool does not currently go to many great lengths to validate
+the file.
+EOF
+exit 1
+}
+
+if [ $# -ne 1 ]; then
+	usage
+fi
+
+# We assume that our proto files are relative to the amc script thusly ../
+PROTO_INC=$MY_DIR/..
+
+protoc -I $PROTO_INC --encode=Aquae.Metadata.Federation $PROTO_INC/metadata.proto < $@
+
