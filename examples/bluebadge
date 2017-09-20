@@ -1,0 +1,259 @@
+#!/bin/sh
+
+# Create an Aquae Metadata File that describes an Aquae Federation that
+# illustrates our Blue Badge Parking Permit Example.
+#
+# This is a synthetic example for testing and may not represent real world entities or
+# usage.
+#
+# Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09/07
+
+ME=$(readlink -fn $0)
+MY_DIR=$(dirname $ME)
+PATH=$MY_DIR/../tools:$PATH
+
+
+usage() {
+cat >&2 <<EOF
+Usage: `basename $0`
+Create an Aquae Metadata File in Protobuf Text Format that describes an Aquae
+Federation that illustrates our Blue Badge Parking Permit Example.
+
+This is a synthetic example for testing and may not represent real world entities or usage.
+
+This creates a federation that includes the following nodes:
+	dla.dwp.gov.uk
+		A Data Authority responsible for answering queries about
+		the Disability Living Allowance Benefit.
+
+	pip.dwp.gov.uk
+		A Data Authority responsible for answering queries about the
+		Personal Independence Payments Benefit.
+
+	bb.dft.gov.uk
+		A Query Server responsible for working out a subject's
+		eligibility for a blue badge on behalf of local authorities.
+		This node owns the business logic for the Blue Badge query and
+		has relationships with the Data Authorities so that it can ask
+		the questions it needs in order to determine a subject's
+		eligibility and provide the correct answer to the local
+		authority.
+
+	wcc.la.gov.uk
+		A Servide Provider responsible for issuing Blue Badges to
+		citizens in a particular Local Authority.
+
+	lcc.la.gov.uk
+		A Servide Provider responsible for issuing Blue Badges to
+		citizens in another Local Authority.
+
+	id.gds.gov.uk
+		An Identiy Bridge responsible for signing the Subject
+		Identities that a Local Authority wants to make a Blue Badge
+		query against so that the Data Authorities know that it is
+		authentic.
+
+The federation defines the following queries:
+	dla-higher?
+		This query returns true when the Mobility component of the
+		Subject's Disability Living Allowance entitlement is at the
+		Higher rate.
+
+	pip>8?
+		This query returns true when the Mobility component of the
+		Subject's Personal Independence Payment entitlement is scored
+		with 8 points or more.
+
+	bb?
+		This query returns true when a subject is eligible for a Blue
+		Badge based on the automatically eligibility criteria defined
+		by DfT.
+
+
+...and the following Confidence Attributes that assist with matching:
+	NI# - National Insurance Number
+		The National Insurance Number is an account number that DWP use
+		to store a subject's entitlements. However, in some
+		circumstances, it is possible to use it to build confidence in
+		an Identity Match.
+
+Agreements are not currently implemented.
+
+
+All nodes are given a localhost address and their own port.
+EOF
+exit 1
+}
+
+die() {
+	echo $@ >&2
+	exit 1
+}
+
+make() {
+	command make -f $MY_DIR/Makefile $@ >/dev/null
+}
+
+
+if [ $# -ne 0 ]; then
+	usage
+fi
+
+DAYS=30
+
+# Prerequisites
+make dla.dwp.gov.uk.crt.der
+make pip.dwp.gov.uk.crt.der
+make bb.dft.gov.uk.crt.der
+make wcc.la.gov.uk.crt.der
+make lcc.la.gov.uk.crt.der
+make id.gds.gov.uk.crt.der
+
+
+# Header
+create-header
+
+# Validity
+create-validity $DAYS
+
+# Nodes
+create-node-header
+create-node dla.dwp.gov.uk 127.0.0.1 8099 dla.dwp.gov.uk.crt.der
+create-node pip.dwp.gov.uk 127.0.0.2 8098 pip.dwp.gov.uk.crt.der
+create-node bb.dft.gov.uk  127.0.0.3 8097 bb.dft.gov.uk.crt.der
+create-node wcc.la.gov.uk  127.0.0.4 8096 wcc.la.gov.uk.crt.der
+create-node lcc.la.gov.uk  127.0.0.5 8095 lcc.la.gov.uk.crt.der
+create-node id.gds.gov.uk  127.0.0.6 8094 id.gds.gov.uk.crt.der
+
+# Agreements
+# FIXME: Agreements are not currently implemented so send them to /dev/null.
+cat > /dev/null <<EOF
+
+################################################################################
+# List of agreements between nodes in the federation.
+
+agreement {
+	link {
+		nodeFrom: "wcc.la.gov.uk"
+		nodeTo: "bb.dft.gov.uk"
+		question {
+			queryName: "bb?"
+		}
+	}
+	link {
+		nodeFrom: "bb.la.gov.uk"
+		nodeTo: "wcc.dft.gov.uk"
+		answer {
+			queryName: "bb?"
+		}
+	}
+	link {
+		nodeFrom: "wcc.la.gov.uk"
+		nodeTo: "dla.dwp.gov.uk"
+		eid {}
+	}
+	link {
+		nodeFrom: "wcc.la.gov.uk"
+		nodeTo: "pip.dwp.gov.uk"
+		eid {}
+	}
+	link {
+		nodeFrom: "id.gds.gov.uk"
+		nodeTo: "wcc.la.gov.uk"
+		eid {}
+	}
+	justification: "Data shaing agreement between WCC and DFT for Blue Badge"
+	# scope: "" # Should be absent when there is no scope.
+	legalBasis: "Education Act"
+	onDemand {}
+	oneShot {}
+}
+
+agreement {
+	link {
+		nodeFrom: "bb.dft.gov.uk"
+		nodeTo: "dla.dwp.gov.uk"
+		question {
+			queryName: "dla-higher?"
+		}
+	}
+	link {
+		nodeFrom: "dla.dft.gov.uk"
+		nodeTo: "bb.dwp.gov.uk"
+		answer {
+			queryName: "dla-higher?"
+		}
+	}
+	link {
+		nodeFrom: "bb.dft.gov.uk"
+		nodeTo: "pip.dwp.gov.uk"
+		question {
+			queryName: "pip>8?"
+		}
+	}
+	link {
+		nodeFrom: "pip.dft.gov.uk"
+		nodeTo: "bb.dwp.gov.uk"
+		answer {
+			queryName: "pip>8?"
+		}
+	}
+	justification: "Data shaing agreement between DFT and DWP for Blue Badge on behalf of Local Authorities"
+	scope: "bb?" # This agreement is only valid for answering bb? queries.
+	legalBasis: "Education Act"
+	onDemand {}
+	oneShot {}
+}
+
+EOF
+
+# Queries
+cat <<EOF
+
+################################################################################
+# List of queries available to nodes in this federation.
+
+query {
+	name: "dla-higher?"
+	node {
+		nodeId: "dla.dwp.gov.uk"
+		matchingRequirements {
+			required: SURNAME
+			required: POSTCODE
+			disambiguators: HOUSE_NUMBER
+			confidenceBuilders: "NI#"
+		}
+	}
+}
+query {
+	name: "pip>8?"
+	node {
+		nodeId: "pip.dwp.gov.uk"
+		matchingRequirements {
+			required: SURNAME
+			required: YEAR_OF_BIRTH
+			disambiguators: HOUSE_NUMBER
+			disambiguators: DATE_OF_BIRTH
+			confidenceBuilders: "NI#"
+		}
+	}
+}
+query {
+	name: "bb?"
+	node {
+		nodeId: "bb.dft.gov.uk"
+	}
+	choice {
+		requiredQuery: "dla-higher?"
+	}
+	choice {
+		requiredQuery: "pip>8?"
+	}
+}
+
+EOF
+
+# Confidence Attributes
+create-confidence-attribute-header
+create-confidence-attribute "NI#" "National Insurance Number"
+
