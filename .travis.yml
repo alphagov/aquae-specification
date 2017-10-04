@@ -1,0 +1,20 @@
+---
+language: perl
+
+# We have no dependencies - skip installation
+install: true
+
+script: make dist
+
+before_deploy: mkdir ./pkg && mv specification-*.tgz ./pkg/
+deploy:
+  - provider: s3
+    access_key_id: AKIAIWRSDO533NY4GO6A
+    secret-access-key:
+      secure: hIScWtd/oHXvyLDBwXZ3gBduqUssSOeUd1/K2o1GVBu8Gv/nuS8Qh2SaXxZYf9uCSKmlaba8LaiytlxIcEZNphNDj4ewR7fy5qWUWQVwQYdMb8X608YwCEFRfn+izcMaG2N7TG677KUvVignGOTkc6L5xIWWbH74YXrDCF79qZlu0ixQmr4EWAwdFgSAzriPwhhUa2RvZfmKCCW9UOWn2qqgb/4fvaF75O7lRIeQmUktgiAxUH19kqi0I7KQmaxYmP7JxN0Fz05KIc1BjKJL0KK6ZOCrnDy50L01468Zl+7G6eZgZ7lGdL8aLx7RnORAyS6bvdgjMMSYsKUlNjobW0W8sKdCGv1iRWdsrolfYj14j4O5K9U1R5xNHZpn6wA/uf3nqrwdNKIXnrbaQvqqpenTNuzZ3ueffoaP7jxjHTT78ekZ005lqzDs7wcVDfImo1rJE+0XFdKparnrrz62prae6elSI6yNu4aKsK0zVZWyXF6T9Nbmq/OFHXMxTW1m/YIiQyLlxR5iwMh2A0X5q+dp0rmdh7ECV7taSJ66lO/A91/ZNUwP6QlGbfWa1AEp20OV2Y6x8tX0kwGW3weCr1ACk80fsVypCabooMkOStMklGxTUReGIDBbcm3FqK2qrgIKxinmPISFBBDZNGbONqGFPFo1Ie8k9bMPCFLmh3E=
+    bucket: aquae-specification
+    skip_cleanup: true
+    region: eu-west-2
+    local_dir: ./pkg
+    on:
+      all_branches: true
