@@ -41,8 +41,8 @@ DESC=$2
 
 cat <<EOF
 confidenceAttribute {
-        name: "$NAME"
-        description: "$DESC"
+	name: "$NAME"
+	description: "$DESC"
 }
 
 EOF
