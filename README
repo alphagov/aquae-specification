@@ -4,116 +4,111 @@
 
   Copyright (C) 2017, The Personal Data Exchange Team, Crown Copyright (Government Digital Service).
 
- 1. Introduction
+1. Introduction
 
-        gov.uk Personal Data Exchange is a way to query existing personal data
-        held by government. This distribution is the technical specification
-        for how the system operates and a set of tools for working with the
-        messages and protocols defined.
+       gov.uk Personal Data Exchange is a way to query existing personal data
+       held by government. This distribution is the technical specification
+       for how the system operates and a set of tools for working with the
+       messages and protocols defined.
 
-        There are a number of files supplied:
+       The whole package is distributed under an MIT license and as such is
+       free to use and modify as long as you agree to its terms.
 
-        + transport.md
+       Note: Should you have any trouble in setting up and using these tools,
+       please feel free to contact:
 
-            This file documents the low-level transport protocols used
-            by participants in the system.
+       + Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>
+       + Simon Worthington <simon.worthington@digital.cabinet-office.gov.uk>
 
-        + metadata.md
+2. Specification
 
-            This file documents the format and structure of the configuration
-            file produced.
+       The specification is described in the following files:
 
-        + messaging.md
+       + transport.md
 
-            This file documents the format and sequences of messages sent
-            by pariticpants in the system.
+           This file documents the low-level transport protocols used
+           by participants in the system.
 
-        + md2protobuf
+       + metadata.md
 
-            This is a script to extract Protocol Buffers definitions from
-            Markdown files. We use it to produce the .proto files
-            automatically from our specification documentation so that the two
-            can be maintained together.
+           This file documents the format and structure of the configuration
+           file produced.
 
-        + build.ps1
+       + messaging.md
 
-            This provides md2protobuf style functionality for PowerShell on
-            Windows.
-
-        + Makefile
-
-            Here we script the tools to produce the outputs.
-
-        + build.ps1
-
-            This provides the build functionality of the Makefile
-            for PowerShell on Windows.
-
-        The whole package is distributed under an MIT license and as such is
-        free to use and modify as long as you agree to its terms.
-
-        Note: Should you have any trouble in setting up and using these tools,
-        please feel free to contact:
-
-            + Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>
-            + Simon Worthington <simon.worthington@digital.cabinet-office.gov.uk>
+           This file documents the format and sequences of messages sent
+           by participants in the system.
 
 
- 2. Installation
+3. Installation
 
-        The tools in this package can be run straight away; they do not need to
-        be built or installed. However, they do have a number of dependencies
-        which need to be satisfied.
+       The tools in this package can be run straight away; they do not need to
+       be built or installed. However, they do have a number of dependencies
+       which need to be satisfied.
 
-        For UNIX systems, the tools require GNU Make and Perl. These tools are
-        usually available by default or from system packages.
+       For UNIX systems, the tools require GNU Make and Perl. These tools are
+       usually available by default or from system packages.
 
-        For Windows systems, the tools require PowerShell, which is availble by
-        default in Windows 10 or from http://msdn.microsoft.com/en-us/powershell.
-
-
- 3. Usage
-
-        In order to render the specification and build the protocol and
-        message definition, on UNIX invoke `make` thus:
-
-            make all
-
-        Or from PowerShell on Windows:
-
-            .\build.ps1
-
-        This will produce two files:
-
-        + metadata.proto
-
-            This contains the Protocol Buffer definitions for the metadata
-            file that is used to set policy in a federation of Aquae nodes.
-
-        + messaging.proto
-
-            This contains the Protocol Buffer definitions for the inter-node
-            messaging protocol.
+       For Windows systems, the tools require PowerShell, which is availble by
+       default in Windows 10 or from http://msdn.microsoft.com/en-us/powershell.
 
 
- 4. Compatibility notes
+4. Usage
 
-        This specification is not yet stable and, as such, we make no
-        gurantees of backwards or fowards compatibility. We do not recommend
-        that this system is deployed in anger.
+       In order to render the specification and build the protocol and
+       message definition, on UNIX invoke `make` thus:
+
+           make all
+
+       Or from PowerShell on Windows:
+
+           .\build.ps1
+
+       This will produce three files:
+
+       + transport.proto
+
+           This contains the Protocol Buffer definitions for the low-level
+           transport protocols.
+
+       + metadata.proto
+
+           This contains the Protocol Buffer definitions for the metadata
+           file that is used to set policy in a federation of Aquae nodes.
+
+       + messaging.proto
+
+           This contains the Protocol Buffer definitions for the inter-node
+           messaging protocol.
 
 
- 5. What's next?
+5. Examples
 
-        First and foremost, enjoy the tools and use and extend them to build
-        your own Personal Data Exchange Federations.
+       The scripts in the examples directory create Aquae Metadata files in
+       Protobuf Text Format that describes an example Aquae Federation.
 
-        Please feel free to send tools that you build with this so that they
-        can be integrated and distributed with this package.
+       These are synthetic examples for testing and may not represent real world entities or usage.
+       
+       Please consult examples/README.md for more information.
 
-        Suggestion, extensions and patches are welcome.
+6. Compatibility notes
 
-        If you have any questions or problems (even the slightest problems, or
-        the most stupid questions), then please feel free to get in touch with
-        us directly using the addresses above. We will try to help you, get you
-        going or point you in the right direction.
+       This specification is not yet stable and, as such, we make no
+       guarantees of backwards or forwards compatibility. We do not recommend
+       that this system is deployed in anger.
+
+
+7. What's next?
+
+       First and foremost, enjoy the tools and use and extend them to build
+       your own Personal Data Exchange Federations.
+
+       Please feel free to send tools that you build with this so that they
+       can be integrated and distributed with this package.
+
+       Suggestions, extensions and patches are welcome.
+
+       If you have any questions or problems (even the slightest problem, or
+       the stupidest of questions), then please feel free to get in touch with
+       us directly using the addresses above. We will try to help you, get you
+       going or point you in the right direction.

@@ -7,7 +7,7 @@
 2. All connections to the TCP port must use TLS.
 
     1. All TLS connections MUST only use the algorithms and cipher suites permitted by the TLS v1.3 specification.
-    TODO: is TLS v1.3 all authenticated encyption (e.g. MACed, so GCM, AEAD)
+    TODO: is TLS v1.3 all authenticated encryption (e.g. MACed, so GCM, AEAD)
     2. Nodes SHOULD use TLS v1.3 where available, but MAY use TLS v1.2, as long as the above requirement is obeyed.
 
 3. Both nodes on the TLS connection MUST supply certificates to the other party (mutual TLS).
@@ -78,7 +78,7 @@ The [Encapsulation Protocol](#Encapsulation_Protocol) is composed of messages sp
 
 3. The length comes next and is an 8 bit integer. The length describes the number of 8 bit octets that follow containing the entirety of the [Encapsulation Protocol](#Encapsulation_Protocol)'s Header message and nothing more.
 
-4. A number of opaque 8 bit octets, at least as large in number as the previously specified Length, then follows. This is the Payload. There is no maximum length of a Payload and it may be longer than the number of octets specified by the Length header if the [Encapsulation Protocol](#Encapsulation_Protocol) Header message specifies its own payload.
+4. A number of opaque octets, at least as large in number as the previously specified Length, then follows. This is the Payload. There is no maximum length of a Payload and it may be longer than the number of octets specified by the Length header if the [Encapsulation Protocol](#Encapsulation_Protocol) Header message specifies its own payload.
 
 5. After the end of the Payload, another Frame begins immediately.
 

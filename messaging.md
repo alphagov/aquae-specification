@@ -14,7 +14,7 @@
 
 ## Protocol
 
-The Aquae Messaging Protocol consists of messages sent back and forth. It is not strictly a request/response style protocol. For now it is client server: a server listens for connections and a client opens a connection. When the converstaion is over, if neither peer closes the connection, it can be reused but the roles of the client and the server may not change.
+The Aquae Messaging Protocol consists of messages sent back and forth. It is not strictly a request/response style protocol. For now it is client server: a server listens for connections and a client opens a connection. When the conversation is over, if neither peer closes the connection, it can be reused but the roles of the client and the server may not change.
 
 This document outlines a number of Protocol Buffer Messages. Ones called `*Request` are suitable for a client to send to a server. Ones called `*Response` are suitable for a server to send back to a client. The server does not always have to have received a Request in order to be able to send a Response: unsolicited Responses are allowed and the client must handle them. All other Protocol Buffer Messages are definitions of domain level objects which are used by the Request/Response messages.
 
@@ -168,13 +168,13 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
 
     1. The sending node should redact the identity fields that are optional using the object hashing method TODO: what is the object hashing method. c.f. Ben Laurie who is well known.
 
-5. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns a `BadQuery` response. Receiving nodes should check that:
+6. The receiving node checks the query is valid using it's metadata file. If it is invalid, it returns `BadQueryResponse`. Receiving nodes should check that:
 
-    0. The metadata versions are the same
-    1. It can answer the query
-    2. The sending node (service) has authorization to ask that query (by checking the permissions/DSA) TODO: work out how to do same department permissions vs cross-department DSAs. "Smart nodes" e.g. proxies need permissions that are not listed in the metadata, pairs of nodes in metadata can use DSAs
-    3. The query is allowed to be run for this subject (by checking the appropriate consent server authorisation)
-    4. No checks are made on the agent and delegate identities (this is handled by the consent server)
+    1. The metadata versions are the same
+    2. It can answer the query
+    3. The sending node (service) has authorization to ask that query (by checking the permissions/DSA) TODO: work out how to do same department permissions vs cross-department DSAs. "Smart nodes" e.g. proxies need permissions that are not listed in the metadata, pairs of nodes in metadata can use DSAs
+    4. The query is allowed to be run for this subject (by checking the appropriate consent server authorisation)
+    5. No checks are made on the agent and delegate identities (this is handled by the consent server)
     6. The identity has been encrypted for the all the nodes that will need it (and not more)
     7. The identity contains all the fields required and shared between all of the nodes (as above)
     8. The transaction-id (the digest of the `Scope` object, not including the signature) has not been used before.
@@ -198,15 +198,15 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
     }
     ```
 
-6. The receiving node starts preparing the query.
+7. The receiving node starts preparing the query.
 
-    1. If it encouters a peice of data that is required from another node, it forms a `Query` payload of it's own and submits that to the next node.
+    1. If it encounters a piece of data that is required from another node, it forms a `Query` payload of it's own and submits that to the next node.
 
         1. The `name` and `inputs` are defined by whatever information it needs from the next node. The `dsaId` is picked from the metadata based on the `scope`.
         2. The `scope` is copied from the previous query.
         3. The `queryId` is a unique id that identifies the conversation between two nodes (as distinct from the transaction-id, which identifies all the conversations answering the highest-level question).
 
-    2. If it encounters a peice of data that is required from a database it has access to, it decrypts and attempts to match the `subjectIdentity` to it's database. This process is implementation-dependent.
+    2. If it encounters a piece of data that is required from a database it has access to, it decrypts and attempts to match the `subjectIdentity` to its database. This process is implementation-dependent.
 
     ```protobuf
     message QueryResponse {
@@ -243,7 +243,7 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
 
 7. If any of the nodes return a `MoreIdentityResponse`, the SP must resubmit the `Query` message with unredacted identity fields.
 
-    1. The identity message must contain exactly the fields it did previously along with every field that was additionally requested by  one or more nodes.
+    1. The identity message must contain exactly the fields it did previously along with every field that was additionally requested by one or more nodes.
     2. The same set of fields must be sent to each node.
 
 7. When the origin node has received responses from all of the identity nodes, it sends a `SecondWhistle` message along the query path to tell the query servers to begin executing the query logic against the data from the matched records. Once the `SecondWhilste` has been processed, the node can finalise the transaction and clear resources - no further messages for this `queryId` are permitted.
