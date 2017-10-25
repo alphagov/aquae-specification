@@ -48,8 +48,7 @@
 #  + Ensure "exactly one of" for the "oneof" clauses.
 #  + Ensure required fields are present (most of them are required).
 
-ME=$(readlink -fn $0)
-MY_DIR=$(dirname $ME)
+MY_DIR=$(cd $(dirname "$0") && pwd -P) # Script itself can't be a symlink.
 
 usage() {
 cat >&2 <<EOF

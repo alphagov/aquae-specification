@@ -8,8 +8,7 @@
 #
 # Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09/07
 
-ME=$(readlink -fn $0)
-MY_DIR=$(dirname $ME)
+MY_DIR=$(cd $(dirname "$0") && pwd -P) # Script itself can't be a symlink.
 PATH=$MY_DIR/../tools:$PATH
 
 
