@@ -44,8 +44,8 @@ cat <<EOF
 
 validity {
         version: "1"
-        validFrom: "$NOW"
-        validTo:   "$EXPIRY"
+        valid_from: "$NOW"
+        valid_to:   "$EXPIRY"
 }
 
 EOF

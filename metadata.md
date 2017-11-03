@@ -19,8 +19,8 @@
     ```protobuf
     message Validity {
       optional string version = 1;
-      optional string validFrom = 2; // A date using our profile of RFC-3339
-      optional string validTo = 3; // A date using our profile of RFC-3339
+      optional string valid_from = 2; // A date using our profile of RFC-3339
+      optional string valid_to = 3; // A date using our profile of RFC-3339
     }
 
     message Endpoint {
@@ -36,12 +36,12 @@
 
     // Is the relationship between SP <-> QS and QS <-> DA the same DSA? Or do you need one each?
     message SharingLink {
-      optional string nodeFrom = 2;
-      optional string nodeTo = 3;
+      optional string node_from = 2;
+      optional string node_to = 3;
 
-      message Question { optional string queryName = 1; } // TODO: query params should NOT contain PII
-      message Answer { optional string queryName = 1; } // TODO: return values should be in here
-      message UnencryptedIdentity { repeated MatchingSpec.IdFields identityFields = 1; }
+      message Question { optional string query_name = 1; } // TODO: query params should NOT contain PII
+      message Answer { optional string query_name = 1; } // TODO: return values should be in here
+      message UnencryptedIdentity { repeated MatchingSpec.IdFields identity_fields = 1; }
       message EncryptedIdentity { }
       message ConfidenceAttributes { repeated string types = 1; }
 
@@ -75,14 +75,14 @@
 
       message ConsentRequirement {
         // Requires user to give explicit consent through a consent server
-        optional Endpoint consentServer = 1;
+        optional Endpoint consent_server = 1;
       }
       message OnDemandRequirement {
         // SP can execute query when other business process dictate that it's required (i.e. legacy form, user unaware of Aquae)
       }
       message TransparencyRequirement {
         // Requires user to have seen the query plan and a record of this from consent/transparency server
-        optional Endpoint transparencyServer = 1; // TODO: node name
+        optional Endpoint transparency_server = 1; // TODO: node name
       }
     }
 
@@ -110,7 +110,7 @@
 
     message ImplementingNode {
       optional string name = 1;
-      optional MatchingSpec matchingRequirements = 2; // Can be empty
+      optional MatchingSpec matching_requirements = 2; // Can be empty
     }
 
     ```
@@ -121,7 +121,7 @@
 
     ```protobuf
     message Choice {
-      repeated string requiredQuery = 1;
+      repeated string required_query = 1;
     }
 
     message Node {

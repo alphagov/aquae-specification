@@ -57,18 +57,18 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
 
   ```protobuf
   message IdentitySignRequest {
-    optional PersonIdentity subjectIdentity = 1;
+    optional PersonIdentity subject_identity = 1;
     // TODO: also need to send the query that we want to run. Then identity bridge verifies.
-    repeated string identitySetNodes = 2;
+    repeated string identity_set_nodes = 2;
   }
 
   message PersonIdentity {
     optional string surname = 1;
     optional string postcode = 2;
-    optional int32  birthYear = 3;
+    optional int32 birth_year = 3;
     optional string initials = 4; // Initials in little endian Western order
-    optional string houseNumber = 6;
-    optional string dateOfBirth = 7; // A date using our profile of RFC-3339 with hour, minute, seconds and portions of the second set to zero.
+    optional string house_number = 6;
+    optional string date_of_birth = 7; // A date using our profile of RFC-3339 with hour, minute, seconds and portions of the second set to zero.
   }
 
   message AgentIdentity {
@@ -191,15 +191,15 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
     ```protobuf
     message BadQueryResponse {
       enum Reason {
-        StaleMetadata = 0;
-        CannotAnswerQuery = 1;
-        ServiceUnauthorized = 2;
-        NoConsentToken = 3;
-        AgentUnauthorized = 4;
-        DelegateUnauthorized = 5;
-        MissingIdentity = 6;
-        IdentityTooOpen = 7;
-        MissingIdentityFields = 8;
+        STALE_METADATA = 0;
+        CANNOT_ANSWER_QUERY = 1;
+        SERVICE_UNAUTHORIZED = 2;
+        NO_CONSENT_TOKEN = 3;
+        AGENT_UNAUTHORIZED = 4;
+        DELEGATE_UNAUTHORIZED = 5;
+        MISSING_IDENTITY = 6;
+        IDENTITY_TOO_OPEN = 7;
+        MISSING_IDENTITY_FIELDS = 8;
       } // TODO: NCSC: how detailed is this in non-debug?
 
       optional bytes queryId = 1;
@@ -221,8 +221,8 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
     message QueryResponse {
       optional bytes queryId = 1;
       oneof result {
-        MoreIdentityResponse moreIdentityResponse = 3;
-        MatchCompleteResponse matchCompleteResponse = 4;
+        MoreIdentityResponse more_identity_response = 3;
+        MatchCompleteResponse match_complete_response = 4;
       }
     }
     ```

@@ -217,7 +217,7 @@ query {
 	name: "dla-higher?"
 	node {
 		name: "dla.dwp.gov.uk"
-		matchingRequirements {
+		matching_requirements {
 			required: SURNAME
 			required: POSTCODE
 			disambiguator: HOUSE_NUMBER
@@ -229,7 +229,7 @@ query {
 	name: "pip>8?"
 	node {
 		name: "pip.dwp.gov.uk"
-		matchingRequirements {
+		matching_requirements {
 			required: SURNAME
 			required: YEAR_OF_BIRTH
 			disambiguator: HOUSE_NUMBER
@@ -244,10 +244,10 @@ query {
 		name: "bb.dft.gov.uk"
 	}
 	choice {
-		requiredQuery: "dla-higher?"
+		required_query: "dla-higher?"
 	}
 	choice {
-		requiredQuery: "pip>8?"
+		required_query: "pip>8?"
 	}
 }
 
