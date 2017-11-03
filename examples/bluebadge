@@ -216,7 +216,7 @@ cat <<EOF
 query {
 	name: "dla-higher?"
 	node {
-		nodeId: "dla.dwp.gov.uk"
+		name: "dla.dwp.gov.uk"
 		matchingRequirements {
 			required: SURNAME
 			required: POSTCODE
@@ -228,7 +228,7 @@ query {
 query {
 	name: "pip>8?"
 	node {
-		nodeId: "pip.dwp.gov.uk"
+		name: "pip.dwp.gov.uk"
 		matchingRequirements {
 			required: SURNAME
 			required: YEAR_OF_BIRTH
@@ -241,7 +241,7 @@ query {
 query {
 	name: "bb?"
 	node {
-		nodeId: "bb.dft.gov.uk"
+		name: "bb.dft.gov.uk"
 	}
 	choice {
 		requiredQuery: "dla-higher?"

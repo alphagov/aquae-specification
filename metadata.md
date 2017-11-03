@@ -109,7 +109,7 @@
     }
 
     message ImplementingNode {
-      optional string nodeId = 1;
+      optional string name = 1;
       optional MatchingSpec matchingRequirements = 2; // Can be empty
     }
 
