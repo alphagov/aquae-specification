@@ -104,8 +104,8 @@
       }
 
       repeated IdFields required = 1;
-      repeated IdFields disambiguators = 2;
-      repeated string confidenceBuilders = 3;
+      repeated IdFields disambiguator = 2;
+      repeated string confidence = 3;
     }
 
     message ImplementingNode {

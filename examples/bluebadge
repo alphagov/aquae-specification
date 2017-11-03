@@ -220,8 +220,8 @@ query {
 		matchingRequirements {
 			required: SURNAME
 			required: POSTCODE
-			disambiguators: HOUSE_NUMBER
-			confidenceBuilders: "NI#"
+			disambiguator: HOUSE_NUMBER
+			confidence: "NI#"
 		}
 	}
 }
@@ -232,9 +232,9 @@ query {
 		matchingRequirements {
 			required: SURNAME
 			required: YEAR_OF_BIRTH
-			disambiguators: HOUSE_NUMBER
-			disambiguators: DATE_OF_BIRTH
-			confidenceBuilders: "NI#"
+			disambiguator: HOUSE_NUMBER
+			disambiguator: DATE_OF_BIRTH
+			confidence: "NI#"
 		}
 	}
 }
