@@ -68,7 +68,7 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
     optional int32  birthYear = 3;
     optional string initials = 4; // Initials in little endian Western order
     optional string houseNumber = 6;
-    optional string dateOfBirth = 7; // As an RFC-3339 date
+    optional string dateOfBirth = 7; // A date using our profile of RFC-3339 with hour, minute, seconds and portions of the second set to zero.
   }
 
   message AgentIdentity {

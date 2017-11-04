@@ -19,8 +19,8 @@
     ```protobuf
     message Validity {
       optional string version = 1;
-      optional string validFrom = 2; // string of RFC-3339
-      optional string validTo = 3;
+      optional string validFrom = 2; // A date using our profile of RFC-3339
+      optional string validTo = 3; // A date using our profile of RFC-3339
     }
 
     message Endpoint {
