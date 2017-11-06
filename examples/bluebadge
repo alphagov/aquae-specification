@@ -8,9 +8,9 @@
 #
 # Andy Bennett <andyjpb@digital.cabinet-office.gov.uk>, 2017/09/07
 
-ME=$(readlink -fn $0)
-MY_DIR=$(dirname $ME)
-PATH=$MY_DIR/../tools:$PATH
+EXAMPLES_DIR=$(dirname $0)
+TOOL_DIR=${EXAMPLES_DIR}/../tools
+MAKEFILE=${EXAMPLES_DIR}/Makefile
 
 
 usage() {
@@ -91,7 +91,7 @@ die() {
 }
 
 make() {
-	command make -f $MY_DIR/Makefile $@ >/dev/null
+	command make -f $MAKEFILE $@ >/dev/null
 }
 
 
@@ -111,19 +111,19 @@ make id.gds.gov.uk.crt.der
 
 
 # Header
-create-header
+${TOOL_DIR}/create-header
 
 # Validity
-create-validity $DAYS
+${TOOL_DIR}/create-validity $DAYS
 
 # Nodes
-create-node-header
-create-node dla.dwp.gov.uk 127.0.0.1 8099 dla.dwp.gov.uk.crt.der
-create-node pip.dwp.gov.uk 127.0.0.2 8098 pip.dwp.gov.uk.crt.der
-create-node bb.dft.gov.uk  127.0.0.3 8097 bb.dft.gov.uk.crt.der
-create-node wcc.la.gov.uk  127.0.0.4 8096 wcc.la.gov.uk.crt.der
-create-node lcc.la.gov.uk  127.0.0.5 8095 lcc.la.gov.uk.crt.der
-create-node id.gds.gov.uk  127.0.0.6 8094 id.gds.gov.uk.crt.der
+${TOOL_DIR}/create-node-header
+${TOOL_DIR}/create-node dla.dwp.gov.uk 127.0.0.1 8099 dla.dwp.gov.uk.crt.der
+${TOOL_DIR}/create-node pip.dwp.gov.uk 127.0.0.2 8098 pip.dwp.gov.uk.crt.der
+${TOOL_DIR}/create-node bb.dft.gov.uk  127.0.0.3 8097 bb.dft.gov.uk.crt.der
+${TOOL_DIR}/create-node wcc.la.gov.uk  127.0.0.4 8096 wcc.la.gov.uk.crt.der
+${TOOL_DIR}/create-node lcc.la.gov.uk  127.0.0.5 8095 lcc.la.gov.uk.crt.der
+${TOOL_DIR}/create-node id.gds.gov.uk  127.0.0.6 8094 id.gds.gov.uk.crt.der
 
 # Agreements
 # FIXME: Agreements are not currently implemented so send them to /dev/null.
@@ -254,6 +254,6 @@ query {
 EOF
 
 # Confidence Attributes
-create-confidence-attribute-header
-create-confidence-attribute "NI#" "National Insurance Number"
+${TOOL_DIR}/create-confidence-attribute-header
+${TOOL_DIR}/create-confidence-attribute "NI#" "National Insurance Number"
 
