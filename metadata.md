@@ -113,6 +113,13 @@
       optional MatchingSpec matchingRequirements = 2; // Can be empty
     }
 
+    ```
+
+    Each `Choice` message specifies one set of dependencies that a particular Query may have. These dependencies take the form of a list of other Querys whose answers are required. The set of all `Choice` messages constitues a Directed Acyclic Graph of Querys and implementations MUST enforce this property. i.e it MUST ensure that there are no query loops and MUST raise an error if they encounter Metadata files that contain loops.
+
+    If a Query needs a result from a specific other Query more than once (for example, with different parameters) then it MUST appear more than once in the `requiredQuery` list. It MUST appear the maximum number of times that a single invocation of the Query will call it.
+
+    ```protobuf
     message Choice {
       repeated string requiredQuery = 1;
     }
