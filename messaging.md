@@ -103,8 +103,18 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
       optional string dsaId = 9; // TODO: interesting that this has ended up here. is it a dragon?
     }
 
-    message Choice {
-      repeated string requiredQuery = 1;
+    // The Query to answer (query) and the Required Queries from the Choice that was chosen by the user for that Query.
+    // If the Query has no Choices to choose from then required_query is omitted.
+    // This structure should be redactable.
+    // query plan only - no info about which part of the tree the next node is in or which node is planned to run each query
+    // no consideration for multiple implementing nodes for a query
+    // no consideration for multiple matching requirements for an implementing node for a query
+    // no consideration for clustered nodes
+    // no support for redacting parts of the query plan that the next hop node does not need to see
+    // no requirement that the implementing nodes keep track of consent tokens as this requires synchronised global state
+    message QueryPlan {
+      optional Question  query          = 1;
+      repeated QueryPlan required_query = 2;
     }
 
     message Query {
@@ -114,13 +124,12 @@ TODO: This should probably be signed so that intermediate nodes can't cause too 
 
       // The transaction-id of the scope is the digest. TODO: algorithm.
       message Scope {
-        optional Question originalQuestion = 1;
         optional bytes nOnce = 2; // Monotonically increasing value set by CS
         optional SignedIdentity subjectIdentity = 3;
         optional PersonIdentity delegateIdentity = 4;
         optional AgentIdentity agentIdentity = 5;
         optional ServiceIdentity serviceIdentity = 6;
-        repeated Choice choice = 7;
+	optional QueryPlan plan = 8;
       }
 
       message SignedScope {
