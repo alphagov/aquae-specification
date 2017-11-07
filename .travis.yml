@@ -16,5 +16,6 @@ deploy:
     skip_cleanup: true
     region: eu-west-2
     local_dir: ./pkg
+    acl: public_read
     on:
       all_branches: true
