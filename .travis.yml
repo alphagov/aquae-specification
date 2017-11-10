@@ -1,10 +1,13 @@
 ---
+sudo: required
+services:
+- docker
+
 language: perl
 
-# We have no dependencies - skip installation
-install: true
+install: docker build -t build -f build.dockerfile .
 
-script: make dist
+script: docker run -v $PWD:/src build /bin/sh -c "make -C /src dist"
 
 before_deploy: mkdir ./pkg && mv specification-*.tgz ./pkg/
 deploy:

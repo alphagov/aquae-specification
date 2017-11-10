@@ -1,6 +1,8 @@
 .PHONY: all dist clean mrproper
 
-ALL=metadata.proto messaging.proto transport.proto
+PROTOS=metadata.proto messaging.proto transport.proto
+EXAMPLES=examples/bluebadge.federation examples/bluebadge.federation.txt
+ALL=$(PROTOS) $(EXAMPLES)
 SPEC=specification-$(shell git describe --always --tags).tgz
 
 ifndef TAR
@@ -22,12 +24,17 @@ mrproper: clean
 	$(RM) *~
 	$(RM) specification-*.tgz
 
+examples/%.federation.txt: examples/%
+	cd $(dir $@) && ./$(notdir $<) > $(notdir $@)
+
+examples/%.federation: examples/%.federation.txt
+	./tools/amc $< > $@
 
 %.proto : %.md
 	./md2protobuf $< $@
 
 specification-%.tar: $(ALL)
-	$(TAR) $@ $+
+	$(TAR) $@ $+ examples/*.key
 
 %.tgz: %.tar
 	$(GZ) $@ $+
