@@ -90,7 +90,7 @@ die() {
 }
 
 make() {
-	command make -f $MY_DIR/Makefile $@ >/dev/null
+	command make -f $MY_DIR/Makefile $@ >&2
 }
 
 

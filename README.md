@@ -56,13 +56,17 @@ default in Windows 10 or from http://msdn.microsoft.com/en-us/powershell.
 ## 4. Usage
 
 In order to render the specification and build the protocol and
-message definition, on UNIX invoke `make` thus:
+message definition, invoke `make` thus:
 
     make all
 
-Or from PowerShell on Windows:
+Windows users can install builds of GNU Make, `sh` and `perl`,
+and will also need a tool capable of writing `.tar.gz` files, such as 7-Zip.
+Then set the following environment varialbles to get full functionality:
 
-    .\build.ps1
+    $Env:RM='powershell ''function rm_all { rm -ErrorAction:SilentlyContinue -force $$args }; rm_all'''
+    $Env:TAR='"C:/Program Files/7-Zip/7z.exe" a -ttar'
+    $Env:GZ='"C:/Program Files/7-Zip/7z.exe" a'
 
 This will produce three files:
 

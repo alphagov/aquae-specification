@@ -17,7 +17,7 @@ mrproper: clean
 	openssl genpkey -out $@ -outform PEM -algorithm rsa -pkeyopt rsa_keygen_bits:4096
 
 %.csr: %.key
-	openssl req -outform PEM -out $@ -new -subj "/CN=$*" -key $< -keyform PEM -sha256 -batch -verbose
+	openssl req -outform PEM -out $@ -new -subj '/CN=$*' -key $< -keyform PEM -sha256 -batch -verbose
 
 %.crt: %.csr %.key
 	openssl x509 -inform PEM -outform PEM -in $*.csr -out $@ -sha256 -addtrust clientAuth -addtrust serverAuth -signkey $*.key -clrext -keyform PEM -days 365 -req

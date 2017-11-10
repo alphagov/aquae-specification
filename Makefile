@@ -3,22 +3,31 @@
 ALL=metadata.proto messaging.proto transport.proto
 SPEC=specification-$(shell git describe --always --tags).tgz
 
+ifndef TAR
+TAR=tar -cvf
+endif
+ifndef GZ
+GZ=gzip -c >
+endif
+
 all: $(ALL)
 
 dist: $(SPEC)
 
 clean:
-	rm -f $(ALL)
-	rm -f $(SPEC)
+	$(RM) $(ALL)
+	$(RM) $(SPEC)
 
 mrproper: clean
-	rm -f *~
-	rm -f specification-*.tgz
+	$(RM) *~
+	$(RM) specification-*.tgz
 
 
 %.proto : %.md
 	./md2protobuf $< $@
 
-specification-%.tgz: $(ALL)
-	tar -zcvf $@ $+
+specification-%.tar: $(ALL)
+	$(TAR) $@ $+
 
+%.tgz: %.tar
+	$(GZ) $@ $+
