@@ -24,13 +24,13 @@ mrproper: clean
 	$(RM) *~
 	$(RM) specification-*.tgz
 
-examples/%.federation.txt: examples/%
+examples/%.federation.txt: examples/% ./tools/create-*
 	cd $(dir $@) && ./$(notdir $<) > $(notdir $@)
 
-examples/%.federation: examples/%.federation.txt
+examples/%.federation: examples/%.federation.txt ./tools/amc $(PROTOS)
 	./tools/amc $< > $@
 
-%.proto : %.md
+%.proto: %.md ./md2protobuf
 	./md2protobuf $< $@
 
 specification-%.tar: $(ALL)
